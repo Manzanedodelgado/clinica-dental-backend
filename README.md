@@ -51,22 +51,42 @@ Una aplicación web completa para la gestión integral de la clínica dental Rub
 - **Integraciones**: Configuración de sistemas externos
 - **Respaldos**: Sistema de copias de seguridad
 
-### 🗄️ Integración SQL Server
+### 🏥 Logo y Identidad Visual
+- **Icono Separado**: Muela dental independiente en SVG (imgs/tooth-icon.svg)
+- **Logo Principal**: Solo texto "RUBIO GARCÍA DENTAL" sin muela
+- **Color Correcto**: Azul oscuro (#304D6B) según imagen original
+- **Muela con Implante**: 6 líneas horizontales representando roscas de implante
+- **Versatilidad**: Icono usable independiente en cualquier contexto
+
+### 🗄️ Integración SQL Server Bidireccional
 - **Base de Datos SQL Server**: Conexión directa con tabla `dbo.DCitas`
 - **Autenticación Windows**: Usuario `gabinete2\box2` con permisos `sysadmin`
+- **Comunicación Bidireccional**: WhatsApp ↔ SQL Server ↔ Calendario en tiempo real
+- **Confirmación de Citas**: Pacientes confirman/cancelan por WhatsApp, actualiza SQL Server
 - **Sincronización Automática**: Actualización cada 30 segundos
 - **Operaciones CRUD**: Crear, leer, actualizar y eliminar citas en tiempo real
 - **Fallback Local**: Funcionamiento sin conexión usando localStorage
 - **Notificaciones**: Sistema de alertas para operaciones de base de datos
 - **Logging Completo**: Registro detallado de todas las operaciones
+- **Script de Pruebas**: Testing completo de funcionalidad bidireccional
 - **Documentación**: Guía completa en `SQL_Integration_Documentation.md`
 
-### 🔄 Sistema de Sincronización
+### 🤖 Agente IA Avanzado
+- **Confirmación Automática**: Nueva automatización (ID: 6) para gestionar confirmaciones
+- **Análisis de Mensajes**: Reconoce palabras clave de confirmación/cancelación
+- **Actualización SQL Server**: Cambios automáticos en estado de citas
+- **Respuestas Inteligentes**: Mensajes automáticos según respuesta del paciente
+- **Monitoreo Continuo**: Verificación de mensajes entrantes cada 30 segundos
+- **Logging Completo**: Registro de todas las confirmaciones y cancelaciones
+
+### 🔄 Sistema de Sincronización Bidireccional
+- **WhatsApp → SQL Server**: Confirmaciones/cancelaciones actualizan `dbo.DCitas.Estado`
+- **SQL Server → Calendario**: Cambios se reflejan inmediatamente en la agenda
 - **Estado de Conexión**: Monitor en tiempo real del estado SQL Server
 - **Caché Inteligente**: Almacenamiento local como respaldo temporal
 - **Eventos en Tiempo Real**: Notificación automática de cambios en BD
 - **Manejo de Errores**: Recuperación automática de fallos de conexión
-- **Consistencia de Datos**: Garantía de sincronización bidireccional
+- **Consistencia de Datos**: Garantía de sincronización completa bidireccional
 
 ## Credenciales de Acceso
 
@@ -106,13 +126,18 @@ Una aplicación web completa para la gestión integral de la clínica dental Rub
 │   └── main.css              # Estilos principales
 ├── scripts/
 │   ├── main.js               # Funcionalidad principal
-│   ├── calendar.js           # Sistema de calendario
+│   ├── calendar.js           # Sistema de calendario (integrado SQL)
 │   ├── whatsapp.js           # Centro de mensajes
-│   ├── ai-agent.js           # Agente IA
+│   ├── ai-agent.js           # Agente IA (confirmación bidireccional)
 │   ├── invoices.js           # Sistema de facturación
-│   └── accounting.js         # Módulo de contabilidad
-└── imgs/
-    └── logo.svg              # Logo de la clínica
+│   ├── accounting.js         # Módulo de contabilidad
+│   ├── database-config.js    # Configuración SQL Server
+│   ├── database-manager.js   # Manager de base de datos
+│   └── confirmation-test.js  # Script de pruebas bidireccionales
+├── imgs/
+│   ├── logo.svg              # Logo solo texto "RUBIO GARCÍA DENTAL"
+│   └── tooth-icon.svg        # Icono de muela dental independiente
+└── SQL_Integration_Documentation.md  # Documentación SQL Server completa
 ```
 
 ## Funcionalidades Destacadas

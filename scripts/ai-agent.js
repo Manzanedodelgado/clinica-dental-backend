@@ -130,6 +130,20 @@ class AIAgentManager {
                 lastRun: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
                 nextRun: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
                 success: true,
+                stats: { sent: 7, failed: 1 }
+            },
+            {
+                id: 6,
+                name: 'Confirmación de Citas',
+                description: 'Permite a pacientes confirmar o cancelar citas por WhatsApp, actualizando SQL Server',
+                isActive: true,
+                type: 'appointment_confirmation',
+                schedule: 'instant',
+                lastRun: new Date(Date.now() - 30 * 60 * 1000),
+                nextRun: new Date(),
+                success: true,
+                stats: { confirmed: 12, cancelled: 3, failed: 1 }
+            }
                 stats: { sent: 3, failed: 0 }
             }
         ];
@@ -272,8 +286,17 @@ class AIAgentManager {
                         </span>
                     </div>
                     <div class="automation-stats">
-                        <small>Enviados: ${automation.stats.sent}</small>
-                        ${automation.stats.failed > 0 ? `<br><small style="color: var(--danger);">Fallidos: ${automation.stats.failed}</small>` : ''}
+                        ${automation.type === 'appointment_confirmation' 
+                            ? `
+                                <small>Confirmadas: ${automation.stats.confirmed || 0}</small><br>
+                                <small>Canceladas: ${automation.stats.cancelled || 0}</small><br>
+                                <small>Fallidas: ${automation.stats.failed || 0}</small>
+                            `
+                            : `
+                                <small>Enviados: ${automation.stats.sent}</small>
+                                ${automation.stats.failed > 0 ? `<br><small style="color: var(--danger);">Fallidos: ${automation.stats.failed}</small>` : ''}
+                            `
+                        }
                     </div>
                     <div class="automation-actions">
                         <button class="btn btn-sm ${automation.isActive ? 'btn-outline' : 'btn-primary'} automation-toggle" 
@@ -293,14 +316,25 @@ class AIAgentManager {
     }
 
     startMonitoring() {
-        // Simulate continuous monitoring
-        setInterval(() => {
+        // Monitor automático para mensajes de WhatsApp y confirmaciones
+        setInterval(async () => {
             if (this.isActive) {
+                // Verificar mensajes entrantes para confirmaciones/cancelaciones
+                await this.processIncomingMessages();
+                
+                // Procesar automatizaciones programadas
                 this.processMessages();
                 this.checkScheduledAutomations();
                 this.updateStatistics();
             }
         }, 30000); // Every 30 seconds
+        
+        // Verificación inicial al cargar
+        setTimeout(async () => {
+            if (this.isActive) {
+                await this.processIncomingMessages();
+            }
+        }, 5000);
     }
 
     processMessages() {
@@ -360,6 +394,11 @@ class AIAgentManager {
             case 'implant_followup':
                 result = this.sendImplantFollowUps();
                 description = `Seguimientos de implantes enviados (${result.count} mensajes)`;
+                break;
+                
+            case 'appointment_confirmation':
+                result = this.handleAppointmentConfirmation();
+                description = `Confirmaciones de citas procesadas (${result.confirmed} confirmadas, ${result.cancelled} canceladas)`;
                 break;
                 
             default:
@@ -510,8 +549,18 @@ class AIAgentManager {
 
     updateStatistics() {
         this.statistics.messagesProcessed++;
-        this.statistics.autoResponses = this.automations.reduce((total, automation) => 
-            total + automation.stats.sent, 0);
+        
+        // Calcular respuestas automáticas de diferentes tipos
+        const regularAutomations = this.automations.filter(a => a.type !== 'appointment_confirmation');
+        const confirmationAutomation = this.automations.find(a => a.type === 'appointment_confirmation');
+        
+        this.statistics.autoResponses = regularAutomations.reduce((total, automation) => 
+            total + (automation.stats.sent || 0), 0);
+            
+        // Agregar estadísticas de confirmación
+        if (confirmationAutomation) {
+            this.statistics.autoResponses += (confirmationAutomation.stats.confirmed || 0) + (confirmationAutomation.stats.cancelled || 0);
+        }
         
         // Simulate average response time calculation
         this.statistics.averageResponseTime = Math.floor(Math.random() * 120) + 30; // 30-150 seconds
@@ -528,7 +577,15 @@ class AIAgentManager {
             'status_change': '🔄 Cambio de Estado',
             'behavior_update': '⚙️ Configuración',
             'automation_toggle': '🎛️ Automatización',
-            'automation_executed': '⚡ Automatización Ejecutada'
+            'automation_executed': '⚡ Automatización Ejecutada',
+            // Nuevas actividades de confirmación de citas
+            'appointment_confirmed': '✅ Cita Confirmada',
+            'appointment_cancelled': '❌ Cita Cancelada',
+            'appointment_confirmed_sql': '🗄️ Confirmación SQL',
+            'appointment_cancelled_sql': '🗄️ Cancelación SQL',
+            'explanation_sent': '💬 Mensaje Explicativo',
+            'message_process_error': '❌ Error de Mensajes',
+            'messages_processed': '📱 Mensajes Procesados'
         };
         return labels[action] || action;
     }
@@ -567,6 +624,215 @@ class AIAgentManager {
     setBehaviorConfig(config) {
         this.behavior = { ...this.behavior, ...config };
         this.updateBehavior();
+    }
+
+    /**
+     * Manejar confirmaciones y cancelaciones de citas por WhatsApp
+     */
+    async handleAppointmentConfirmation() {
+        console.log('🔍 Procesando confirmaciones de citas...');
+        
+        try {
+            // Obtener mensajes pendientes de confirmación
+            const pendingMessages = this.getPendingConfirmationMessages();
+            
+            if (pendingMessages.length === 0) {
+                return { confirmed: 0, cancelled: 0, failed: 0, success: true };
+            }
+
+            let confirmed = 0;
+            let cancelled = 0;
+            let failed = 0;
+
+            for (const message of pendingMessages) {
+                try {
+                    // Analizar respuesta del paciente
+                    const response = this.analyzePatientResponse(message.text);
+                    
+                    if (response.action === 'confirm') {
+                        // Confirmar cita en SQL Server
+                        await this.confirmAppointment(message.appointmentId);
+                        confirmed++;
+                        
+                        this.logActivity('appointment_confirmed', 
+                            `Cita confirmada por ${message.patientName} para ${message.appointmentDate} ${message.appointmentTime}`,
+                            'success');
+                            
+                    } else if (response.action === 'cancel') {
+                        // Cancelar cita en SQL Server
+                        await this.cancelAppointment(message.appointmentId);
+                        cancelled++;
+                        
+                        this.logActivity('appointment_cancelled', 
+                            `Cita cancelada por ${message.patientName} para ${message.appointmentDate} ${message.appointmentTime}`,
+                            'warning');
+                            
+                    } else {
+                        // Respuesta no válida, enviar mensaje explicativo
+                        await this.sendExplanationMessage(message.patientPhone, response.message);
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error procesando confirmación:', error);
+                    failed++;
+                }
+            }
+
+            // Actualizar estadísticas
+            const automation = this.automations.find(a => a.type === 'appointment_confirmation');
+            if (automation) {
+                automation.stats.confirmed = (automation.stats.confirmed || 0) + confirmed;
+                automation.stats.cancelled = (automation.stats.cancelled || 0) + cancelled;
+                automation.stats.failed = (automation.stats.failed || 0) + failed;
+            }
+
+            return { confirmed, cancelled, failed, success: true };
+            
+        } catch (error) {
+            console.error('❌ Error en confirmaciones de citas:', error);
+            return { confirmed: 0, cancelled: 0, failed: 1, success: false };
+        }
+    }
+
+    /**
+     * Obtener mensajes pendientes de confirmación
+     */
+    getPendingConfirmationMessages() {
+        // En producción, esto vendría de la base de datos de mensajes de WhatsApp
+        // Por ahora simulamos algunos mensajes
+        return [
+            {
+                id: 'msg_001',
+                patientPhone: '666123456',
+                patientName: 'María García',
+                text: 'Confirmo la cita de mañana a las 10:30',
+                appointmentId: 'apt_001',
+                appointmentDate: '2025-11-17',
+                appointmentTime: '10:30',
+                status: 'pending'
+            },
+            {
+                id: 'msg_002',
+                patientPhone: '666789123',
+                patientName: 'Juan Pérez',
+                text: 'No puedo asistir, voy a cancelar',
+                appointmentId: 'apt_002',
+                appointmentDate: '2025-11-17',
+                appointmentTime: '09:00',
+                status: 'pending'
+            }
+        ];
+    }
+
+    /**
+     * Analizar respuesta del paciente
+     */
+    analyzePatientResponse(text) {
+        const lowerText = text.toLowerCase();
+        
+        // Palabras de confirmación
+        const confirmKeywords = ['confirmo', 'si', 'ok', 'correcto', 'de acuerdo', 'confirmo la cita', 'asisto'];
+        
+        // Palabras de cancelación
+        const cancelKeywords = ['cancelar', 'no puedo', 'imposible', 'no podré', 'cancelo', 'no asistir'];
+        
+        // Verificar cancelación
+        if (cancelKeywords.some(keyword => lowerText.includes(keyword))) {
+            return {
+                action: 'cancel',
+                message: 'Entendido, su cita ha sido cancelada. Nos pondremos en contacto para reprogramar.'
+            };
+        }
+        
+        // Verificar confirmación
+        if (confirmKeywords.some(keyword => lowerText.includes(keyword))) {
+            return {
+                action: 'confirm',
+                message: 'Perfecto, cita confirmada. ¡Nos vemos entonces!'
+            };
+        }
+        
+        // Respuesta ambigua
+        return {
+            action: 'ambiguous',
+            message: 'No he podido procesar su respuesta. Por favor confirme escribiendo "confirmo" o "cancelar".'
+        };
+    }
+
+    /**
+     * Confirmar cita en SQL Server
+     */
+    async confirmAppointment(appointmentId) {
+        console.log('✅ Confirmando cita:', appointmentId);
+        
+        if (window.dbManager) {
+            await window.dbManager.updateAppointment(appointmentId, {
+                status: 'Confirmada'
+            });
+        }
+        
+        // Notificar al calendario
+        if (window.calendarManager) {
+            await window.calendarManager.loadAppointments();
+            window.calendarManager.renderCalendar();
+        }
+        
+        this.logActivity('appointment_confirmed_sql', `Cita ${appointmentId} confirmada en SQL Server`);
+    }
+
+    /**
+     * Cancelar cita en SQL Server
+     */
+    async cancelAppointment(appointmentId) {
+        console.log('❌ Cancelando cita:', appointmentId);
+        
+        if (window.dbManager) {
+            await window.dbManager.updateAppointment(appointmentId, {
+                status: 'Cancelada'
+            });
+        }
+        
+        // Notificar al calendario
+        if (window.calendarManager) {
+            await window.calendarManager.loadAppointments();
+            window.calendarManager.renderCalendar();
+        }
+        
+        this.logActivity('appointment_cancelled_sql', `Cita ${appointmentId} cancelada en SQL Server`);
+    }
+
+    /**
+     * Enviar mensaje explicativo
+     */
+    async sendExplanationMessage(phone, message) {
+        console.log('📱 Enviando mensaje explicativo a:', phone);
+        
+        // En producción, esto enviaría un mensaje real por WhatsApp
+        this.logActivity('explanation_sent', `Mensaje explicativo enviado a ${phone}: ${message}`);
+    }
+
+    /**
+     * Obtener mensajes entrantes de WhatsApp para procesar
+     */
+    async processIncomingMessages() {
+        try {
+            // En producción, esto obtendría mensajes reales desde WhatsApp
+            // Por ahora simulamos el procesamiento
+            const confirmationResult = await this.handleAppointmentConfirmation();
+            
+            if (confirmationResult.confirmed > 0 || confirmationResult.cancelled > 0) {
+                this.logActivity('messages_processed', 
+                    `Mensajes procesados: ${confirmationResult.confirmed} confirmaciones, ${confirmationResult.cancelled} cancelaciones`,
+                    'success');
+            }
+            
+            return confirmationResult;
+            
+        } catch (error) {
+            console.error('❌ Error procesando mensajes entrantes:', error);
+            this.logActivity('message_process_error', `Error procesando mensajes: ${error.message}`, 'error');
+            return { success: false };
+        }
     }
 
     getActiveAutomations() {

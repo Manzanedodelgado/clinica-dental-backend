@@ -1,5 +1,5 @@
-<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Icono de la muela separado -->
+<svg width="40" height="60" viewBox="0 0 40 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Muela dental con implante usando fill-rule="evenodd" para crear agujeros -->
   <path 
     d="
       <!-- Contorno exterior de la muela (sentido horario) -->
@@ -47,16 +47,4 @@
     fill="#304D6B" 
     fill-rule="evenodd"
   />
-  
-  <!-- Text: RUBIO GARCÍA -->
-  <text x="55" y="20" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0F74A8">RUBIO GARCÍA</text>
-  
-  <!-- Text: DENTAL -->
-  <text x="55" y="35" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#333333">DENTAL</text>
-  
-  <!-- Decorative line -->
-  <line x1="55" y1="40" x2="180" y2="40" stroke="#333333" stroke-width="1"/>
-  
-  <!-- Slogan -->
-  <text x="55" y="52" font-family="Arial, sans-serif" font-size="10" fill="#666666">implantología y estética de vanguardia</text>
 </svg>

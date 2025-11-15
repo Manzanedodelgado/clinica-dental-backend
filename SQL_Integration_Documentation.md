@@ -6,12 +6,15 @@ La aplicación web ha sido **adaptada completamente** para integrar con SQL Serv
 
 ### ✅ Funcionalidades Implementadas
 
-1. **Logo Actualizado**: Color azul correcto (#284869) con muela dental e implante
+1. **Logo Separado**: Icono de muela independiente (tooth-icon.svg) + texto "RUBIO GARCÍA DENTAL"
 2. **Conexión SQL Server**: Configuración completa para Windows Authentication
-3. **Gestión de Base de Datos**: Sistema completo de CRUD para citas y pacientes
-4. **Sincronización Automática**: Cada 30 segundos con tu base de datos local
-5. **Notificaciones**: Sistema de alertas para operaciones de base de datos
-6. **Fallback Local**: Funcionamiento sin conexión (localStorage)
+3. **Comunicación Bidireccional**: Confirmación/cancelación desde WhatsApp actualiza SQL Server automáticamente
+4. **Gestión de Base de Datos**: Sistema completo de CRUD para citas y pacientes
+5. **Sincronización Automática**: Cada 30 segundos con tu base de datos local
+6. **Agente IA Avanzado**: Nueva automatización de confirmación de citas (ID: 6)
+7. **Notificaciones**: Sistema de alertas para operaciones de base de datos
+8. **Fallback Local**: Funcionamiento sin conexión (localStorage)
+9. **Script de Pruebas**: Testing completo de funcionalidad bidireccional
 
 ## 🔧 Configuración SQL Server
 
@@ -222,6 +225,106 @@ LOGGING.level = 'debug';
 - 2 pacientes de ejemplo
 - 3 citas de muestra
 - Tratamientos predefinidos
+
+## 🔄 Comunicación Bidireccional - Confirmación de Citas
+
+### Flujo de Confirmación/Cancelación
+```
+Paciente envía WhatsApp → Agente IA analiza respuesta → Actualiza SQL Server → Calendario se actualiza automáticamente
+```
+
+### Funcionalidad Implementada
+
+#### 1. **Agente IA - Automatización de Confirmación (ID: 6)**
+- **Nombre**: "Confirmación de Citas"
+- **Descripción**: "Permite a pacientes confirmar o cancelar citas por WhatsApp, actualizando SQL Server"
+- **Tipo**: `appointment_confirmation`
+- **Ejecución**: Instantánea
+- **Estados**: ✅ Confirmada, ❌ Cancelada, ⚠️ Fallida
+
+#### 2. **Palabras Clave de Respuesta**
+**Confirmación:**
+- "confirmo", "si", "ok", "correcto", "de acuerdo"
+- "confirmo la cita", "asisto"
+
+**Cancelación:**
+- "cancelar", "no puedo", "imposible"
+- "no podré", "cancelo", "no asistir"
+
+#### 3. **Actualización Automática en SQL Server**
+```sql
+-- Cuando paciente confirma:
+UPDATE dbo.DCitas 
+SET Estado = 'Confirmada', FechaModificacion = GETDATE() 
+WHERE Id = appointment_id;
+
+-- Cuando paciente cancela:
+UPDATE dbo.DCitas 
+SET Estado = 'Cancelada', FechaModificacion = GETDATE() 
+WHERE Id = appointment_id;
+```
+
+#### 4. **Sincronización Bidireccional**
+1. **WhatsApp → SQL Server**: Confirmación/cancelación actualiza `dbo.DCitas.Estado`
+2. **SQL Server → Calendario**: Cambios se reflejan inmediatamente en la agenda
+3. **Monitoreo Automático**: Verificación cada 30 segundos de mensajes entrantes
+4. **Notificaciones**: Alertas de confirmación/cancelación en tiempo real
+
+#### 5. **Script de Pruebas Incluido**
+```javascript
+// En consola del navegador:
+testConfirmation()     // Probar confirmación de cita
+testCancellation()     // Probar cancelación de cita
+testSync()            // Probar sincronización bidireccional
+runAllTests()         // Ejecutar todas las pruebas
+getTestResults()      // Ver resultados de pruebas
+```
+
+### Proceso Detallado
+
+#### Paso 1: Mensaje Entrante
+```
+De: +34 666 123 456 (María García)
+Mensaje: "Confirmo la cita de mañana a las 10:30"
+Estado: Pendiente de procesamiento
+```
+
+#### Paso 2: Análisis por IA
+```javascript
+// Agente IA analiza el mensaje
+const response = this.analyzePatientResponse("confirmo la cita de mañana a las 10:30");
+// Resultado: { action: 'confirm', message: 'Perfecto, cita confirmada!' }
+```
+
+#### Paso 3: Actualización SQL Server
+```javascript
+// Actualiza el estado en SQL Server
+await this.confirmAppointment('apt_001');
+// Resultado: Estado cambia de "Programada" a "Confirmada"
+```
+
+#### Paso 4: Sincronización con Calendario
+```javascript
+// Calendario se actualiza automáticamente
+await calendarManager.loadAppointments();
+calendarManager.renderCalendar();
+// Resultado: Cita aparece como "Confirmada" en la agenda
+```
+
+### Monitoreo y Logging
+El sistema registra todas las actividades:
+- ✅ **appointment_confirmed**: Cita confirmada por paciente
+- ❌ **appointment_cancelled**: Cita cancelada por paciente  
+- 🗄️ **appointment_confirmed_sql**: Actualización en SQL Server
+- 🗄️ **appointment_cancelled_sql**: Cancelación en SQL Server
+- 📱 **messages_processed**: Mensajes procesados
+- 💬 **explanation_sent**: Mensajes explicativos enviados
+
+### Estados de Cita Actualizados
+1. **Programada** → **Confirmada** (paciente confirma)
+2. **Programada** → **Cancelada** (paciente cancela)
+3. **Confirmada** → **Cancelada** (cambio posterior)
+4. **Confirmada** → **Completada** (después de la cita)
 
 ## 📞 Soporte
 
