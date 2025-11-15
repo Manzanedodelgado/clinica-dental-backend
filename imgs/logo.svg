@@ -1,11 +1,22 @@
 <svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Tooth/Implant Icon -->
-  <path d="M25 15 C25 10 30 8 35 8 C40 8 45 10 45 15 C45 20 40 22 35 22 C30 22 25 20 25 15 Z" fill="#333333"/>
-  <path d="M30 15 C30 17 32 19 35 19 C38 19 40 17 40 15 C40 13 38 11 35 11 C32 11 30 13 30 15 Z" fill="#666666"/>
+  <!-- Muela Dental con Implante -->
+  <!-- Corona dental (parte superior) -->
+  <path d="M15 20 Q18 8, 28 8 Q35 8, 38 12 Q41 16, 40 20 Q39 24, 35 26 L25 26 Q20 26, 15 24 Q10 22, 15 20 Z" fill="#4A4A4A"/>
   
-  <!-- Implant threading -->
-  <path d="M35 22 L35 30 M33 24 L37 24 M33 26 L37 26 M33 28 L37 28 M33 30 L37 30" stroke="#333333" stroke-width="1" fill="none"/>
-  <path d="M35 30 L35 35" stroke="#333333" stroke-width="2"/>
+  <!-- Implante dental (parte inferior izquierda) -->
+  <path d="M22 26 Q20 26, 18 28 L15 32 Q13 35, 14 38 Q14 40, 16 41 Q18 42, 20 41 Q22 40, 23 38 L26 34 Q27 32, 25 30 Q24 28, 22 26 Z" fill="#4A4A4A"/>
+  
+  <!-- Líneas del implante (roscas) - espacios negativos -->
+  <path d="M17 28 Q18.5 28, 19.5 28.5" stroke="white" stroke-width="1.5" fill="none"/>
+  <path d="M16.5 30.5 Q18 30.5, 19 31" stroke="white" stroke-width="1.5" fill="none"/>
+  <path d="M16 32.5 Q17.5 32.5, 18.5 33" stroke="white" stroke-width="1.5" fill="none"/>
+  <path d="M15.5 34.5 Q17 34.5, 18 35" stroke="white" stroke-width="1.5" fill="none"/>
+  <path d="M15.5 36 Q17 36, 18 36.5" stroke="white" stroke-width="1.5" fill="none"/>
+  <path d="M16 37.5 Q17 37.5, 17.5 38" stroke="white" stroke-width="1.5" fill="none"/>
+  <path d="M16.5 39 Q17 39, 17.2 39.5" stroke="white" stroke-width="1.5" fill="none"/>
+  
+  <!-- Punta del implante -->
+  <circle cx="17" cy="41" r="1" fill="#4A4A4A"/>
   
   <!-- Text: RUBIO GARCÍA -->
   <text x="55" y="20" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0F74A8">RUBIO GARCÍA</text>
