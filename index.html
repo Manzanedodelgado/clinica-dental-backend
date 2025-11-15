@@ -531,6 +531,227 @@
                     </div>
                 </section>
 
+                <!-- Sistema de Automatización Avanzado Section -->
+                <section id="automatizacion-avanzada" class="content-section">
+                    <div class="section-header">
+                        <h1>🤖 Sistema de Automatización Avanzado</h1>
+                        <div class="section-controls">
+                            <div class="automation-status">
+                                <span class="status-indicator active"></span>
+                                <span>Flujos Dinámicos</span>
+                                <span class="lopd-compliance-badge">
+                                    <i class="fas fa-shield-alt"></i>
+                                    LOPD Compliant
+                                </span>
+                            </div>
+                            <button class="btn btn-primary" onclick="window.testAdvancedAutomation()">
+                                <i class="fas fa-play"></i> Probar Flujo Completo
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="automation-container">
+                        <!-- Panel de Estados de Cita -->
+                        <div class="appointment-states-panel">
+                            <h3>📊 Estados de Cita Disponibles</h3>
+                            <div class="states-grid">
+                                <div class="state-badge state-planificada">
+                                    <i class="fas fa-calendar-plus"></i>
+                                    <span>Planificada</span>
+                                </div>
+                                <div class="state-badge state-confirmada">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Confirmada</span>
+                                </div>
+                                <div class="state-badge state-aceptada">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span>Aceptada</span>
+                                    <small>(Confirmada + Consentimiento)</small>
+                                </div>
+                                <div class="state-badge state-cancelada">
+                                    <i class="fas fa-times-circle"></i>
+                                    <span>Cancelada</span>
+                                </div>
+                                <div class="state-badge state-anula">
+                                    <i class="fas fa-ban"></i>
+                                    <span>Anula</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estadísticas de Automatización -->
+                        <div class="automation-stats-grid">
+                            <div class="automation-stat-card">
+                                <h3>Flujos Activos</h3>
+                                <div class="stat-number" id="activeFlowsCount">0</div>
+                            </div>
+                            <div class="automation-stat-card">
+                                <h3>Completados</h3>
+                                <div class="stat-number success" id="completedFlowsCount">0</div>
+                            </div>
+                            <div class="automation-stat-card">
+                                <h3>Documentos LOPD</h3>
+                                <div class="stat-number info" id="lopdDocumentsCount">0</div>
+                            </div>
+                            <div class="automation-stat-card">
+                                <h3>Cuestionarios</h3>
+                                <div class="stat-number warning" id="questionnairesCount">0</div>
+                            </div>
+                        </div>
+
+                        <!-- Configuración de Flujos -->
+                        <div class="automation-config">
+                            <div class="config-section">
+                                <h3>⚙️ Configuración de Automatización</h3>
+                                <div class="config-grid">
+                                    <div class="form-group">
+                                        <label>Tipo de Flujo por Defecto</label>
+                                        <select id="defaultFlowType">
+                                            <option value="confirmation">Solo Confirmación</option>
+                                            <option value="mixed">Completo (Confirmación + Legal)</option>
+                                            <option value="questionnaire">Solo Cuestionario</option>
+                                            <option value="document">Solo Documentos</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Verificación Legal Obligatoria</label>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="legalVerificationToggle" checked>
+                                            <label for="legalVerificationToggle"></label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Seguimiento LOPD</label>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="lopdTrackingToggle" checked>
+                                            <label for="lopdTrackingToggle"></label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Tiempo de Respuesta</label>
+                                        <select id="responseTimeout">
+                                            <option value="300000">5 minutos</option>
+                                            <option value="600000" selected>10 minutos</option>
+                                            <option value="900000">15 minutos</option>
+                                            <option value="1800000">30 minutos</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Documentos Legales -->
+                            <div class="config-section">
+                                <h3>⚖️ Documentos Legales Requeridos</h3>
+                                <div class="legal-documents-list">
+                                    <div class="legal-document-item">
+                                        <div class="document-info">
+                                            <i class="fas fa-shield-alt"></i>
+                                            <div class="document-details">
+                                                <h4>Consentimiento LOPD</h4>
+                                                <p>Ley de Protección de Datos - Obligatorio</p>
+                                                <span class="legal-status-indicator lopd-accepted">
+                                                    <i class="fas fa-check"></i> Configurado
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-sm btn-secondary" onclick="editLegalDocument('lopd_consent')">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+                                    </div>
+                                    <div class="legal-document-item">
+                                        <div class="document-info">
+                                            <i class="fas fa-file-medical"></i>
+                                            <div class="document-details">
+                                                <h4>Consentimiento Informado</h4>
+                                                <p>Para tratamientos médicos - Obligatorio</p>
+                                                <span class="legal-status-indicator consent-accepted">
+                                                    <i class="fas fa-check"></i> Configurado
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-sm btn-secondary" onclick="editLegalDocument('informed_consent_treatment')">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+                                    </div>
+                                    <div class="legal-document-item">
+                                        <div class="document-info">
+                                            <i class="fas fa-clipboard-list"></i>
+                                            <div class="document-details">
+                                                <h4>Cuestionario Primera Visita</h4>
+                                                <p>Historial médico y dental - Obligatorio</p>
+                                                <span class="legal-status-indicator consent-pending">
+                                                    <i class="fas fa-clock"></i> Configurado
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-sm btn-secondary" onclick="editLegalDocument('first_visit_questionnaire')">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monitor de Flujos en Tiempo Real -->
+                        <div class="automation-monitor">
+                            <div class="monitor-header">
+                                <h3>📡 Monitor de Flujos en Tiempo Real</h3>
+                                <div class="monitor-controls">
+                                    <button class="btn btn-sm" onclick="clearAutomationMonitor()">
+                                        <i class="fas fa-broom"></i> Limpiar
+                                    </button>
+                                    <button class="btn btn-sm" onclick="refreshAutomationStats()">
+                                        <i class="fas fa-sync"></i> Actualizar
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="automationMessages" class="automation-messages">
+                                <div class="empty-state">
+                                    <i class="fas fa-robot"></i>
+                                    <p>Los flujos de automatización aparecerán aquí en tiempo real</p>
+                                    <small>El sistema crea flujos dinámicos basados en las respuestas del paciente</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Controles de Prueba Avanzados -->
+                        <div class="automation-test-section">
+                            <h4>🧪 Pruebas del Sistema de Automatización</h4>
+                            <p>Prueba los diferentes tipos de flujos automatizados y validaciones legales</p>
+                            <div class="automation-test-buttons">
+                                <button class="btn btn-primary" onclick="testFullAutomationFlow()">
+                                    <i class="fas fa-cogs"></i> Flujo Completo
+                                </button>
+                                <button class="btn btn-info" onclick="testQuestionnaireFlow()">
+                                    <i class="fas fa-clipboard-list"></i> Solo Cuestionario
+                                </button>
+                                <button class="btn btn-warning" onclick="testDocumentFlow()">
+                                    <i class="fas fa-file-contract"></i> Solo Documentos
+                                </button>
+                                <button class="btn btn-success" onclick="testLOPDCompliance()">
+                                    <i class="fas fa-shield-alt"></i> Validar LOPD
+                                </button>
+                                <button class="btn btn-secondary" onclick="testStateTransitions()">
+                                    <i class="fas fa-exchange-alt"></i> Estados de Cita
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Historial de Automatización -->
+                        <div class="automation-history">
+                            <div class="history-header">
+                                <h3>📋 Historial de Automatización</h3>
+                                <button class="btn btn-sm btn-secondary" onclick="exportAutomationHistory()">
+                                    <i class="fas fa-download"></i> Exportar
+                                </button>
+                            </div>
+                            <div class="history-content" id="automationHistory">
+                                <!-- El historial se cargará dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Documentos Section -->
                 <section id="documentos" class="content-section">
                     <div class="section-header">
@@ -992,6 +1213,10 @@
     <!-- Appointment Confirmation System -->
     <script src="scripts/appointment-confirmation-system.js"></script>
     <script src="scripts/confirmation-ui-helpers.js"></script>
+    
+    <!-- Advanced Automation System -->
+    <script src="scripts/advanced-automation-system.js"></script>
+    <script src="scripts/automation-ui-helpers.js"></script>
 
     <!-- Notification Container -->
     <div id="notificationContainer" class="notification-container"></div>
