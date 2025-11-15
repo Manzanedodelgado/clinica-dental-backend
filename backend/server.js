@@ -25,6 +25,10 @@ const legalRoutes = require('./routes/legal');
 const questionnaireRoutes = require('./routes/questionnaires');
 const automationRoutes = require('./routes/automation');
 const systemRoutes = require('./routes/system');
+const whatsappRoutes = require('./routes/whatsapp');
+const invoiceRoutes = require('./routes/invoices');
+const accountingRoutes = require('./routes/accounting');
+const doctorRoutes = require('./routes/doctors');
 
 // Configurar logger
 const logger = winston.createLogger({
@@ -193,19 +197,58 @@ app.get('/api', (req, res) => {
             system: {
                 'GET /api/system/stats': 'Obtener estadísticas del sistema',
                 'GET /api/system/logs': 'Obtener logs del sistema'
+            },
+            whatsapp: {
+                'GET /api/whatsapp/conversations': 'Obtener conversaciones WhatsApp',
+                'POST /api/whatsapp/conversations': 'Crear nueva conversación',
+                'GET /api/whatsapp/messages/pending': 'Mensajes pendientes (IA)',
+                'POST /api/whatsapp/confirmation/send': 'Enviar confirmación de cita',
+                'POST /api/whatsapp/confirmation/process': 'Procesar respuesta de confirmación'
+            },
+            invoices: {
+                'GET /api/invoices': 'Obtener todas las facturas',
+                'POST /api/invoices': 'Crear nueva factura',
+                'GET /api/invoices/:id': 'Obtener factura específica',
+                'POST /api/invoices/:id/send': 'Enviar factura por email',
+                'POST /api/invoices/:id/verifactu': 'Enviar a Verifactu'
+            },
+            accounting: {
+                'GET /api/accounting/summary': 'Resumen financiero',
+                'GET /api/accounting/income': 'Reporte de ingresos',
+                'GET /api/accounting/expenses': 'Reporte de gastos',
+                'GET /api/accounting/profit-loss': 'Estado de resultados',
+                'GET /api/accounting/expenses/all': 'Gestión de gastos'
+            },
+            doctors: {
+                'GET /api/doctors': 'Obtener lista de doctores',
+                'GET /api/doctors/:id': 'Obtener doctor específico',
+                'GET /api/doctors/:id/schedule': 'Horario del doctor',
+                'GET /api/doctors/:id/appointments': 'Citas del doctor',
+                'GET /api/doctors/:id/statistics': 'Estadísticas del doctor'
+            },
+            treatments: {
+                'GET /api/treatments': 'Obtener lista de tratamientos',
+                'GET /api/treatments/:id': 'Obtener tratamiento específico',
+                'GET /api/treatments/:id/availability': 'Disponibilidad de tratamiento',
+                'GET /api/treatments/categories': 'Categorías de tratamientos'
             }
         },
         features: [
-            'Gestión completa de citas (CRUD)',
+            'Gestión completa de citas (CRUD) con estados SQL Server',
             'Sistema de automatizaciones con flujos dinámicos',
             'Cumplimiento automático LOPD/RGPD',
             'Registro de consentimientos informados',
             'Cuestionarios de primera visita',
-            'Sistema de confirmación de citas 24h',
-            'Integración WhatsApp Business API (preparado)',
+            'Sistema de confirmación de citas 24h con IA',
+            'Integración WhatsApp Business API completa',
+            'Gestión de facturación con Verifactu',
+            'Sistema contable con reportes financieros',
+            'Gestión de doctores y tratamientos',
             'Sistema de autenticación JWT',
             'Rate limiting y seguridad',
-            'Logging y monitoreo'
+            'Logging y monitoreo',
+            'Análisis de mensajes y NLP',
+            'Calendario inteligente con disponibilidad'
         ],
         documentation: 'https://github.com/tu-usuario/rubio-garcia-dental-api',
         support: 'support@rubiogacialdental.com'
@@ -220,6 +263,11 @@ app.use('/api/legal', legalRoutes);
 app.use('/api/questionnaires', questionnaireRoutes);
 app.use('/api/automation', automationRoutes);
 app.use('/api/system', systemRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/invoices', invoiceRoutes);
+app.use('/api/accounting', accountingRoutes);
+app.use('/api/doctors', doctorRoutes);
+app.use('/api/treatments', doctorRoutes); // Tratamientos usan el mismo controlador
 
 // Manejo de rutas no encontradas
 app.use('*', (req, res) => {
