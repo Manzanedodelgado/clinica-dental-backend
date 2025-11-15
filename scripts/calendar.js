@@ -432,17 +432,51 @@ class CalendarManager {
         this.renderCalendar();
     }
 
-    updateAppointment(appointmentId, updatedData) {
-        const index = this.appointments.findIndex(apt => apt.id === appointmentId);
-        if (index !== -1) {
-            this.appointments[index] = { ...this.appointments[index], ...updatedData };
-            this.renderCalendar();
+    async updateAppointment(appointmentId, updatedData) {
+        try {
+            console.log('✏️ Actualizando cita:', appointmentId);
+            
+            if (window.dbManager) {
+                await window.dbManager.updateAppointment(appointmentId, updatedData);
+                await this.loadAppointments();
+                this.renderCalendar();
+            } else {
+                // Fallback a localStorage
+                const index = this.appointments.findIndex(apt => apt.id === appointmentId);
+                if (index !== -1) {
+                    this.appointments[index] = { ...this.appointments[index], ...updatedData };
+                    localStorage.setItem('appointments', JSON.stringify(this.appointments));
+                    this.renderCalendar();
+                }
+            }
+            
+            this.showNotification('Cita actualizada exitosamente', 'success');
+        } catch (error) {
+            console.error('❌ Error actualizando cita:', error);
+            this.showNotification('Error actualizando la cita', 'error');
         }
     }
 
-    deleteAppointment(appointmentId) {
-        this.appointments = this.appointments.filter(apt => apt.id !== appointmentId);
-        this.renderCalendar();
+    async deleteAppointment(appointmentId) {
+        try {
+            console.log('🗑️ Eliminando cita:', appointmentId);
+            
+            if (window.dbManager) {
+                await window.dbManager.deleteAppointment(appointmentId);
+                await this.loadAppointments();
+                this.renderCalendar();
+            } else {
+                // Fallback a localStorage
+                this.appointments = this.appointments.filter(apt => apt.id !== appointmentId);
+                localStorage.setItem('appointments', JSON.stringify(this.appointments));
+                this.renderCalendar();
+            }
+            
+            this.showNotification('Cita eliminada exitosamente', 'success');
+        } catch (error) {
+            console.error('❌ Error eliminando cita:', error);
+            this.showNotification('Error eliminando la cita', 'error');
+        }
     }
 
     // Export appointments data
@@ -476,6 +510,36 @@ class CalendarManager {
         ]);
 
         return [headers, ...rows].map(row => row.join(',')).join('\n');
+    }
+
+    /**
+     * Mostrar notificaciones al usuario
+     */
+    showNotification(message, type = 'info') {
+        // Crear elemento de notificación
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <span>${message}</span>
+            <button class="notification-close">&times;</button>
+        `;
+
+        // Agregar al DOM
+        const container = document.getElementById('notificationContainer') || document.body;
+        container.appendChild(notification);
+
+        // Auto-remover después de 5 segundos
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+
+        // Botón de cerrar
+        const closeBtn = notification.querySelector('.notification-close');
+        closeBtn.addEventListener('click', () => {
+            notification.remove();
+        });
     }
 }
 

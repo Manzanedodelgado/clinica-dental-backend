@@ -51,6 +51,23 @@ Una aplicación web completa para la gestión integral de la clínica dental Rub
 - **Integraciones**: Configuración de sistemas externos
 - **Respaldos**: Sistema de copias de seguridad
 
+### 🗄️ Integración SQL Server
+- **Base de Datos SQL Server**: Conexión directa con tabla `dbo.DCitas`
+- **Autenticación Windows**: Usuario `gabinete2\box2` con permisos `sysadmin`
+- **Sincronización Automática**: Actualización cada 30 segundos
+- **Operaciones CRUD**: Crear, leer, actualizar y eliminar citas en tiempo real
+- **Fallback Local**: Funcionamiento sin conexión usando localStorage
+- **Notificaciones**: Sistema de alertas para operaciones de base de datos
+- **Logging Completo**: Registro detallado de todas las operaciones
+- **Documentación**: Guía completa en `SQL_Integration_Documentation.md`
+
+### 🔄 Sistema de Sincronización
+- **Estado de Conexión**: Monitor en tiempo real del estado SQL Server
+- **Caché Inteligente**: Almacenamiento local como respaldo temporal
+- **Eventos en Tiempo Real**: Notificación automática de cambios en BD
+- **Manejo de Errores**: Recuperación automática de fallos de conexión
+- **Consistencia de Datos**: Garantía de sincronización bidireccional
+
 ## Credenciales de Acceso
 
 - **Usuario**: JMD
@@ -169,20 +186,22 @@ El sistema cumple completamente con la normativa española Verifactu:
 ## Limitaciones Actuales
 
 - **WhatsApp**: Simulación sin API real de WhatsApp Business
-- **Base de Datos**: Almacenamiento local (no servidor dedicado)
+- **SQL Server**: Requiere implementación de backend API para conexión completa
 - **Email**: Simulación de envío (requiere integración real)
 - **Pagos**: No incluye pasarelas de pago online
 
 ## Futuras Mejoras
 
+- [x] ✅ **Integración SQL Server**: Base de datos SQL Server completa
+- [ ] Backend API completo para SQL Server
 - [ ] Integración real con WhatsApp Business API
-- [ ] Base de datos en servidor dedicado
 - [ ] Pasarelas de pago online
 - [ ] App móvil nativa
 - [ ] Integración con sistemas de imagen médica
 - [ ] Sistema de citas online para pacientes
 - [ ] Portal del paciente
 - [ ] Integración con seguros médicos
+- [ ] Sistema de respaldo automatizado en la nube
 
 ## Contacto Técnico
 
