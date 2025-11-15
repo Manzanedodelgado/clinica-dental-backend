@@ -236,18 +236,18 @@ function isWorkingHours(config = {}) {
 }
 
 /**
- * Procesar mensaje con IA si está habilitado
+ * Procesar mensaje con IA usando el nuevo AI Engine
  */
 async function processMessageWithAI(phoneNumber, messageText) {
     try {
-        const config = await this.getAIConfiguration();
+        const config = await getAIConfiguration();
         
         if (!config.IsEnabled) {
             console.log('🤖 IA deshabilitada, no procesando mensaje');
             return;
         }
         
-        const workingHours = this.isWorkingHours(config);
+        const workingHours = isWorkingHours(config);
         const shouldActivateAI = workingHours ? config.IsActiveOutsideHours : true;
         
         if (!shouldActivateAI) {
@@ -255,30 +255,43 @@ async function processMessageWithAI(phoneNumber, messageText) {
             return;
         }
         
-        // Detectar palabras de urgencia
-        const hasEmergencyKeywords = this.detectEmergencyKeywords(messageText);
+        // Obtener contexto del paciente si existe
+        const patientContext = await getPatientContext(phoneNumber);
         
-        if (hasEmergencyKeywords) {
-            console.log('🚨 Mensaje de emergencia detectado');
-            await this.handleEmergencyMessage(phoneNumber, messageText);
-            return;
-        }
+        // Procesar mensaje con AI Engine
+        const aiResult = await aiEngine.processMessage(messageText, phoneNumber, patientContext);
         
-        // Responder automáticamente basado en el contenido
-        const autoResponse = await this.generateAutoResponse(messageText, phoneNumber);
-        
-        if (autoResponse && config.AutoResponseEnabled) {
-            await this.sendMessageToPatient(phoneNumber, autoResponse);
+        if (aiResult.success && config.AutoResponseEnabled) {
+            await sendMessageToPatient(phoneNumber, aiResult.response);
             
             // Marcar mensaje como procesado por IA
             const db = require('../config/database').dbConfig;
             await db.executeQuery(`
                 UPDATE WhatsAppMessages 
-                SET AIAutoReplySent = 1 
+                SET AIAutoReplySent = 1,
+                    AIConfidence = @confidence,
+                    AIIntent = @intent,
+                    AIUrgencyLevel = @urgency
                 WHERE FromPhone = @phoneNumber 
-                ORDER BY MessageTimestamp DESC 
-                LIMIT 1
-            `, [{ name: 'phoneNumber', value: phoneNumber }]);
+                AND MessageText = @messageText
+                AND MessageTimestamp = (
+                    SELECT MAX(MessageTimestamp) 
+                    FROM WhatsAppMessages 
+                    WHERE FromPhone = @phoneNumber 
+                    AND MessageText = @messageText
+                )
+            `, [
+                { name: 'phoneNumber', value: phoneNumber },
+                { name: 'messageText', value: messageText },
+                { name: 'confidence', value: aiResult.confidence || 0 },
+                { name: 'intent', value: aiResult.intent?.action || 'unknown' },
+                { name: 'urgency', value: aiResult.urgency?.level || 'low' }
+            ]);
+            
+            // Auto-marcar como urgente si es necesario
+            if (aiResult.shouldAutoTag && (aiResult.urgency?.level === 'critical' || aiResult.urgency?.level === 'moderate')) {
+                await tagConversationUrgent(phoneNumber, 'Detección automática de urgencia por IA', 'AI_ENGINE');
+            }
         }
         
     } catch (error) {
@@ -287,9 +300,81 @@ async function processMessageWithAI(phoneNumber, messageText) {
 }
 
 /**
- * Generar respuesta automática basada en el mensaje
+ * Obtener contexto del paciente para la IA
  */
-async function generateAutoResponse(messageText, phoneNumber) {
+async function getPatientContext(phoneNumber) {
+    try {
+        const db = require('../config/database').dbConfig;
+        
+        const query = `
+            SELECT TOP 1 
+                PatientName,
+                LastAppointmentDate,
+                TotalAppointments,
+                LastTreatmentType,
+                IsEmergencyPatient
+            FROM DPatients p
+            LEFT JOIN DCitas a ON p.PatientID = a.PatientID
+            WHERE p.MobilePhone = @phoneNumber OR p.Phone = @phoneNumber
+            ORDER BY a.AppointmentDate DESC
+        `;
+        
+        const result = await db.executeQuery(query, [
+            { name: 'phoneNumber', value: phoneNumber }
+        ]);
+        
+        if (result.recordset.length > 0) {
+            const patient = result.recordset[0];
+            return {
+                name: patient.PatientName,
+                lastAppointment: patient.LastAppointmentDate,
+                totalAppointments: patient.TotalAppointments || 0,
+                lastTreatment: patient.LastTreatmentType,
+                isEmergencyPatient: patient.IsEmergencyPatient || false
+            };
+        }
+        
+        return {};
+        
+    } catch (error) {
+        console.error('Error obteniendo contexto del paciente:', error);
+        return {};
+    }
+}
+const aiEngine = new AIEngine();
+
+/**
+ * Generar respuesta automática usando AI real
+ */
+async function generateAutoResponse(messageText, phoneNumber, patientContext = {}) {
+    try {
+        // Usar el AI Engine real para generar respuesta
+        const aiResult = await aiEngine.processMessage(messageText, phoneNumber, patientContext);
+        
+        if (aiResult.success) {
+            return {
+                message: aiResult.response,
+                urgency: aiResult.urgency,
+                intent: aiResult.intent,
+                shouldAutoTag: aiResult.shouldAutoTag,
+                aiProcessed: true,
+                confidence: aiResult.confidence
+            };
+        } else {
+            // Fallback a respuestas básicas si AI falla
+            return generateBasicResponse(messageText, phoneNumber);
+        }
+        
+    } catch (error) {
+        console.error('AI Engine error:', error);
+        return generateBasicResponse(messageText, phoneNumber);
+    }
+}
+
+/**
+ * Generar respuesta básica de fallback
+ */
+function generateBasicResponse(messageText, phoneNumber) {
     const lowerMessage = messageText.toLowerCase();
     
     // Respuestas específicas para consultas médicas
@@ -323,13 +408,67 @@ async function generateAutoResponse(messageText, phoneNumber) {
 async function handleEmergencyMessage(phoneNumber, messageText) {
     const emergencyResponse = `🚨 RECEPCIÓN TU MENSAJE - EMERGENCIA DETECTADA\n\nGracias por contactar. Te responderemos inmediatamente. Si es muy urgente, por favor llama al ${process.env.CLINIC_MOBILE}.\n\nRubio García Dental - Atención 24h`;
     
-    await this.sendMessageToPatient(phoneNumber, emergencyResponse);
+    await sendMessageToPatient(phoneNumber, emergencyResponse);
     
     // Marcar como urgente en la conversación
-    const conversation = await this.handleNewMessage(phoneNumber, messageText, false);
-    await this.markConversationAsUrgent(conversation.conversationId, 'Respuesta automática - emergencia', 'AI_SYSTEM');
+    const conversation = await handleNewMessage(phoneNumber, messageText, false);
+    await markConversationAsUrgent(conversation.conversationId, 'Respuesta automática - emergencia', 'AI_SYSTEM');
     
     console.log(`🚨 Respuesta de emergencia enviada a ${phoneNumber}`);
+}
+
+/**
+ * Enviar mensaje al paciente
+ */
+async function sendMessageToPatient(phoneNumber, message) {
+    try {
+        // Esta función debería integrarse con el servicio de WhatsApp (Baileys)
+        console.log(`📱 Enviando mensaje a ${phoneNumber}: ${message}`);
+        
+        // TODO: Integrar con WhatsAppService
+        // const whatsappService = require('../services/whatsapp-service');
+        // await whatsappService.sendMessage(phoneNumber, message);
+        
+        return { success: true, messageId: 'temp_' + Date.now() };
+        
+    } catch (error) {
+        console.error('Error enviando mensaje al paciente:', error);
+        throw error;
+    }
+}
+
+/**
+ * Marcar conversación como urgente por teléfono
+ */
+async function tagConversationUrgent(phoneNumber, notes, taggedBy) {
+    try {
+        const db = require('../config/database').dbConfig;
+        
+        // Buscar conversación activa
+        const conversationQuery = `
+            SELECT TOP 1 ConversationID 
+            FROM WhatsAppConversations 
+            WHERE PatientPhone = @phoneNumber 
+            AND IsActive = 1 
+            ORDER BY LastMessageAt DESC
+        `;
+        
+        const result = await db.executeQuery(conversationQuery, [
+            { name: 'phoneNumber', value: phoneNumber }
+        ]);
+        
+        if (result.recordset.length > 0) {
+            const conversationId = result.recordset[0].ConversationID;
+            await markConversationAsUrgent(conversationId, notes, taggedBy);
+            return conversationId;
+        }
+        
+        return null;
+        
+    } catch (error) {
+        console.error('Error marcando conversación como urgente:', error);
+        throw error;
+    }
 }
 
 module.exports = {
@@ -341,5 +480,9 @@ module.exports = {
     isWorkingHours,
     processMessageWithAI,
     generateAutoResponse,
-    handleEmergencyMessage
+    handleEmergencyMessage,
+    sendMessageToPatient,
+    tagConversationUrgent,
+    getPatientContext,
+    generateBasicResponse
 };

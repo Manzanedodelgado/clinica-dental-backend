@@ -448,6 +448,99 @@ Para sincronización con calendarios externos:
 
 MIT License - Ver archivo LICENSE para más detalles.
 
+## 🤖 AI ENGINE - INTELIGENCIA ARTIFICIAL GRATUITA
+
+### ✅ **Sistema de AI Completo**
+Este backend incluye un **sistema de Inteligencia Artificial gratuito y sin límites** utilizando **Ollama** para procesamiento natural de lenguaje especializado en el ámbito dental.
+
+#### 🚀 **Características del AI Engine**
+- **Completamente GRATUITO** - Sin límites de tokens ni costos
+- **Detección inteligente de urgencias** dentales
+- **Respuestas contextuales** personalizadas
+- **Análisis de intención** automático
+- **Integración completa** con WhatsApp y conversaciones
+- **Especializado en clínica dental** - Contexto médico
+
+#### 📊 **Niveles de Detección de Urgencia**
+- 🚨 **CRÍTICO**: "me muero", "dolor insoportable" → Llamada inmediata
+- ⚠️ **MODERADO**: "me duele", "sangra" → Cita prioritaria  
+- 📅 **CITA**: "quiero una cita" → Gestión de agenda
+- 💰 **CONSULTA**: "precio", "tratamiento" → Información comercial
+
+#### ⚙️ **Instalación del AI Engine**
+
+##### **Linux/macOS**
+```bash
+# Script de instalación automática
+chmod +x scripts/install-ollama.sh
+./scripts/install-ollama.sh
+```
+
+##### **Windows** 
+```powershell
+# Ejecutar como Administrador
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+./scripts/install-ollama-windows.ps1
+```
+
+#### 🔧 **Configuración**
+Añadir a `.env`:
+```bash
+# OLLAMA AI ENGINE
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2:3b
+AI_ENABLED=true
+AI_SMART_URGENCY_DETECTION=true
+AI_MIN_CONFIDENCE_THRESHOLD=0.6
+```
+
+#### 📈 **Ejemplos de Respuestas AI**
+
+**Emergencia Crítica:**
+```
+🚨 EMERGENCIA DENTAL DETECTADA
+
+Tu situación requiere atención inmediata. 
+Por favor llama AL INSTANTE al +34 664 218 253 (24h)
+
+🆘 SITUACIÓN CRÍTICA - NO ESPERES
+Rubio García Dental - Emergencias
+```
+
+**Solicitud de Cita:**
+```
+¡Hola! Perfecto, puedo ayudarte a programar tu cita. 
+¿Qué día y horario prefieres?
+
+🗓️ Horarios disponibles:
+L-V: 10:00-14:00 | 16:00-20:00
+S: 10:00-14:00
+
+📍 Rubio García Dental
+```
+
+#### 🧪 **Testing del AI**
+```bash
+# Verificar salud del AI Engine
+curl http://localhost:11434/api/tags
+
+# Test manual
+node -e "
+const AIEngine = require('./services/ai-engine');
+const ai = new AIEngine();
+ai.processMessage('me duele mucho', '+34612345678').then(console.log);
+"
+```
+
+#### 📚 **Documentación Completa**
+Ver documentación detallada en: [`docs/AI-ENGINE.md`](docs/AI-ENGINE.md)
+
+---
+
+## 📄 Licencia
+
+MIT License - Ver archivo LICENSE para más detalles.
+
 ---
 
 **Desarrollado por MiniMax Agent** | Sistema de Gestión Dental Rubio García 2025
