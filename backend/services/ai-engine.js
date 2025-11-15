@@ -1,9 +1,10 @@
 /**
  * AI ENGINE - OLLAMA INTEGRATION
- * Sistema de Inteligencia Artificial Gratuito y Sin Límites
+ * Sistema de Inteligencia Artificial GRATUITO SIN LÍMITES DE TOKENS
  * 
  * Integra Ollama para procesamiento natural de lenguaje
  * Detección inteligente de urgencia y respuestas contextuales
+ * Uso completamente ilimitado y gratuito
  */
 
 const axios = require('axios');
@@ -26,7 +27,7 @@ class AIEngine {
   constructor() {
     this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
     this.defaultModel = process.env.OLLAMA_MODEL || 'llama3.2:3b';
-    this.maxTokens = parseInt(process.env.OLLAMA_MAX_TOKENS) || 1000;
+    this.maxTokens = parseInt(process.env.OLLAMA_MAX_TOKENS) || 50000; // SIN LÍMITE de tokens
     this.timeout = parseInt(process.env.OLLAMA_TIMEOUT) || 30000;
     
     // Contextos especializados para clínica dental
