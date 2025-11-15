@@ -451,10 +451,10 @@ MIT License - Ver archivo LICENSE para más detalles.
 ## 🤖 AI ENGINE - INTELIGENCIA ARTIFICIAL GRATUITA
 
 ### ✅ **Sistema de AI Completo**
-Este backend incluye un **sistema de Inteligencia Artificial gratuito y sin límites** utilizando **Ollama** para procesamiento natural de lenguaje especializado en el ámbito dental.
+Este backend incluye un **sistema de Inteligencia Artificial completamente gratuito y SIN LÍMITES DE TOKENS** utilizando **Ollama** para procesamiento natural de lenguaje especializado en el ámbito dental.
 
 #### 🚀 **Características del AI Engine**
-- **Completamente GRATUITO** - Sin límites de tokens ni costos
+- **Completamente GRATUITO** - Sin límites de tokens ni costos, uso ilimitado
 - **Detección inteligente de urgencias** dentales
 - **Respuestas contextuales** personalizadas
 - **Análisis de intención** automático
