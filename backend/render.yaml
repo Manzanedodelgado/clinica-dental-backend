@@ -1,0 +1,56 @@
+# Configuración para Render.com
+# Sistema de Gestión Dental - Clínica Rubio García
+
+services:
+  - type: web
+    name: clinica-dental-backend
+    env: node
+    buildCommand: npm install --production
+    startCommand: npm start
+    healthCheckPath: /api/system/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_SERVER
+        fromDatabase:
+          name: clinica-dental-db
+          property: host
+      - key: DB_DATABASE
+        fromDatabase:
+          name: clinica-dental-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: clinica-dental-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: clinica-dental-db
+          property: password
+      - key: CLINIC_NAME
+        value: "Clínica Dental Rubio García"
+      - key: CLINIC_TAX_ID
+        value: "B12345678"
+      - key: CLINIC_ADDRESS
+        value: "Calle Principal 123, 28001 Madrid"
+      - key: CLINIC_PHONE
+        value: "915555555"
+      - key: CLINIC_EMAIL
+        value: "info@clinicadental.com"
+      - key: WHATSAPP_COUNTRY_CODE
+        value: "34"
+      - key: WHATSAPP_SESSION_NAME
+        value: "clinica-dental-session"
+      - key: VERIFACTU_ENVIRONMENT
+        value: "production"
+      - key: CORS_ORIGIN
+        value: "https://tu-frontend-dominio.com"
+
+databases:
+  - name: clinica-dental-db
+    plan: standard
+    version: "15"
