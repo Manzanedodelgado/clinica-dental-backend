@@ -2320,3 +2320,333 @@ body {
         font-size: var(--font-xs);
     }
 }
+
+/* ========================================
+   SISTEMA DE CONFIRMACIÓN DE CITAS
+   ======================================== */
+
+/* Contenedor principal de mensajes de confirmación */
+#confirmationMessages {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: var(--space-sm);
+    background: var(--neutral-100);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--neutral-500);
+}
+
+/* Mensaje individual de confirmación */
+.confirmation-message {
+    background: var(--neutral-0);
+    border: 1px solid var(--neutral-500);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-sm);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header del mensaje */
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--neutral-500);
+}
+
+.message-header h4 {
+    color: var(--primary-500);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    margin: 0;
+}
+
+.message-time {
+    color: var(--neutral-700);
+    font-size: var(--font-xs);
+    font-family: 'Courier New', monospace;
+}
+
+/* Contenido del mensaje */
+.message-content p {
+    margin-bottom: var(--space-xs);
+    color: var(--neutral-900);
+    font-size: var(--font-sm);
+}
+
+.message-text {
+    background: var(--neutral-100);
+    padding: var(--space-md);
+    border-radius: var(--radius-sm);
+    margin: var(--space-sm) 0;
+    border-left: 4px solid var(--primary-500);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-xs);
+    line-height: 1.4;
+}
+
+/* Botones de confirmación */
+.confirmation-buttons {
+    display: flex;
+    gap: var(--space-sm);
+    margin: var(--space-md) 0;
+    flex-wrap: wrap;
+}
+
+.confirmation-buttons .btn {
+    flex: 1;
+    min-width: 120px;
+    padding: var(--space-sm) var(--space-md);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.confirmation-buttons .btn-success {
+    background: var(--success);
+    color: var(--neutral-0);
+}
+
+.confirmation-buttons .btn-success:hover {
+    background: #157347;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+}
+
+.confirmation-buttons .btn-danger {
+    background: var(--danger);
+    color: var(--neutral-0);
+}
+
+.confirmation-buttons .btn-danger:hover {
+    background: #bb2d3b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* Estado del mensaje */
+.message-status {
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-xs);
+    font-weight: 600;
+    text-align: center;
+    margin-top: var(--space-sm);
+    border: 1px solid var(--neutral-500);
+    background: var(--neutral-100);
+    color: var(--neutral-700);
+}
+
+.message-status.status-confirmed {
+    background: rgba(25, 135, 84, 0.1);
+    color: var(--success);
+    border-color: var(--success);
+}
+
+.message-status.status-cancelled {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+/* Respuesta automática */
+.message-response {
+    margin-top: var(--space-sm);
+    padding: var(--space-sm);
+    background: rgba(15, 116, 168, 0.05);
+    border: 1px solid var(--primary-500);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-xs);
+    color: var(--neutral-700);
+    display: none;
+}
+
+.message-response strong {
+    color: var(--primary-500);
+}
+
+/* Panel de estadísticas de confirmación */
+.confirmation-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-md);
+    margin: var(--space-lg) 0;
+}
+
+.stat-card {
+    background: var(--neutral-0);
+    border: 1px solid var(--neutral-500);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card h3 {
+    color: var(--neutral-700);
+    font-size: var(--font-xs);
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-card .stat-number {
+    color: var(--primary-500);
+    font-size: var(--font-xl);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-card .stat-number.success {
+    color: var(--success);
+}
+
+.stat-card .stat-number.warning {
+    color: var(--warning);
+}
+
+.stat-card .stat-number.danger {
+    color: var(--danger);
+}
+
+/* Controles de prueba */
+.confirmation-test-controls {
+    background: var(--neutral-100);
+    border: 2px dashed var(--primary-500);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin: var(--space-lg) 0;
+    text-align: center;
+}
+
+.confirmation-test-controls h4 {
+    color: var(--primary-500);
+    margin-bottom: var(--space-md);
+    font-size: var(--font-md);
+}
+
+.confirmation-test-controls .btn {
+    margin: var(--space-xs);
+    padding: var(--space-sm) var(--space-lg);
+}
+
+/* Responsive design para móviles */
+@media (max-width: 768px) {
+    .confirmation-message {
+        padding: var(--space-sm);
+    }
+    
+    .confirmation-buttons {
+        flex-direction: column;
+        gap: var(--space-xs);
+    }
+    
+    .confirmation-buttons .btn {
+        min-width: 100%;
+        flex: none;
+    }
+    
+    .message-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-xs);
+    }
+    
+    .confirmation-stats {
+        grid-template-columns: 1fr;
+        gap: var(--space-sm);
+    }
+    
+    .stat-card {
+        padding: var(--space-md);
+    }
+    
+    .stat-card .stat-number {
+        font-size: var(--font-lg);
+    }
+}
+
+/* Indicador de actividad en tiempo real */
+.confirmation-activity-indicator {
+    position: fixed;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    background: var(--success);
+    color: var(--neutral-0);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: 20px;
+    font-size: var(--font-xs);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    animation: pulse 2s infinite;
+    z-index: 1000;
+    display: none;
+}
+
+.confirmation-activity-indicator.active {
+    display: block;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(25, 135, 84, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
+    }
+}
+
+/* Estados de carga */
+.confirmation-message.sending .message-status {
+    background: var(--primary-100);
+    color: var(--primary-500);
+    border-color: var(--primary-500);
+}
+
+.confirmation-message.sending::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: var(--space-md);
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--primary-500);
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translateY(-50%);
+}
+
+@keyframes spin {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(360deg); }
+}

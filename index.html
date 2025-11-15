@@ -390,6 +390,147 @@
                     </div>
                 </section>
 
+                <!-- Sistema de Confirmación de Citas Section -->
+                <section id="confirmacion-citas" class="content-section">
+                    <div class="section-header">
+                        <h1>📱 Sistema de Confirmación de Citas</h1>
+                        <div class="section-controls">
+                            <div class="confirmation-status">
+                                <span class="status-indicator active"></span>
+                                <span>Automático 24h</span>
+                            </div>
+                            <button class="btn btn-secondary" onclick="window.testAppointmentConfirmation()">
+                                <i class="fas fa-vial"></i> Enviar Mensaje de Prueba
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="confirmation-container">
+                        <!-- Panel de Estadísticas -->
+                        <div class="confirmation-stats" id="confirmationStats">
+                            <div class="stat-card">
+                                <h3>Mensajes Enviados</h3>
+                                <div class="stat-number" id="totalMessagesSent">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Confirmadas</h3>
+                                <div class="stat-number success" id="confirmedCount">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Canceladas</h3>
+                                <div class="stat-number danger" id="cancelledCount">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Activas</h3>
+                                <div class="stat-number warning" id="activeCount">0</div>
+                            </div>
+                        </div>
+
+                        <!-- Panel de Configuración -->
+                        <div class="confirmation-config">
+                            <div class="config-section">
+                                <h3>⚙️ Configuración del Sistema</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label>Anticipación del Mensaje</label>
+                                        <select id="confirmationLeadTime">
+                                            <option value="24">24 horas antes</option>
+                                            <option value="12">12 horas antes</option>
+                                            <option value="6">6 horas antes</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Modo de Envío</label>
+                                        <select id="confirmationMode">
+                                            <option value="automatic">Automático</option>
+                                            <option value="manual">Manual</option>
+                                            <option value="mixed">Mixto</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Reintentos</label>
+                                        <input type="number" id="confirmationRetries" value="3" min="1" max="5">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Estado del Sistema</label>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="confirmationSystemToggle" checked>
+                                            <label for="confirmationSystemToggle"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Plantillas de Respuesta -->
+                            <div class="config-section">
+                                <h3>💬 Plantillas de Respuesta Automática</h3>
+                                <div class="response-templates">
+                                    <div class="template-card">
+                                        <h4>✅ Mensaje de Confirmación</h4>
+                                        <textarea id="confirmationTemplate" rows="3">Muchas gracias por ayudarnos a mejorar nuestra atención!</textarea>
+                                    </div>
+                                    <div class="template-card">
+                                        <h4>❌ Mensaje de Cancelación</h4>
+                                        <textarea id="cancellationTemplate" rows="3">Desea que le demos una nueva cita</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel de Mensajes en Tiempo Real -->
+                        <div class="confirmation-monitor">
+                            <div class="monitor-header">
+                                <h3>📡 Monitoreo en Tiempo Real</h3>
+                                <div class="monitor-controls">
+                                    <button class="btn btn-sm" onclick="window.confirmationSystem.cleanupCompletedConfirmations()">
+                                        <i class="fas fa-broom"></i> Limpiar
+                                    </button>
+                                    <button class="btn btn-sm" onclick="updateConfirmationStats()">
+                                        <i class="fas fa-sync"></i> Actualizar
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="confirmationMessages" class="confirmation-messages">
+                                <div class="empty-state">
+                                    <i class="fas fa-comments"></i>
+                                    <p>Los mensajes de confirmación aparecerán aquí en tiempo real</p>
+                                    <small>El sistema envía automáticamente mensajes 24 horas antes de cada cita</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Controles de Prueba -->
+                        <div class="confirmation-test-controls">
+                            <h4>🧪 Pruebas del Sistema</h4>
+                            <p>Utiliza estos controles para probar el funcionamiento del sistema de confirmación</p>
+                            <div class="test-buttons">
+                                <button class="btn btn-primary" onclick="testConfirmationFlow()">
+                                    <i class="fas fa-play"></i> Probar Flujo Completo
+                                </button>
+                                <button class="btn btn-success" onclick="testConfirmationResponse()">
+                                    <i class="fas fa-check"></i> Simular Confirmación
+                                </button>
+                                <button class="btn btn-danger" onclick="testCancellationResponse()">
+                                    <i class="fas fa-times"></i> Simular Cancelación
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Historial de Actividad -->
+                        <div class="confirmation-history">
+                            <div class="history-header">
+                                <h3>📋 Historial de Actividad</h3>
+                                <button class="btn btn-sm btn-secondary" onclick="exportConfirmationHistory()">
+                                    <i class="fas fa-download"></i> Exportar
+                                </button>
+                            </div>
+                            <div class="history-content" id="confirmationHistory">
+                                <!-- El historial se cargará dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Documentos Section -->
                 <section id="documentos" class="content-section">
                     <div class="section-header">
@@ -847,6 +988,10 @@
     
     <!-- Testing Scripts -->
     <script src="scripts/confirmation-test.js"></script>
+    
+    <!-- Appointment Confirmation System -->
+    <script src="scripts/appointment-confirmation-system.js"></script>
+    <script src="scripts/confirmation-ui-helpers.js"></script>
 
     <!-- Notification Container -->
     <div id="notificationContainer" class="notification-container"></div>

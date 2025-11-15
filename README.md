@@ -18,10 +18,20 @@ Una aplicación web completa para la gestión integral de la clínica dental Rub
 
 ### 🤖 Agente IA Inteligente
 - **Respuestas Automáticas**: IA configurada para responder consultas comunes
-- **Recordatorios Automáticos**: Sistema de recordatorios de citas 24h antes
 - **Envío de Consentimientos**: Automatización de documentos legales
 - **Seguimiento Post-Tratamiento**: Mensajes de seguimiento personalizados
 - **Configuración de Comportamiento**: Ajustes de estilo y tono de comunicación
+
+### 📋 Sistema de Confirmación de Citas
+- **Envío Automático 24h**: Mensajes de confirmación enviados automáticamente 24 horas antes de cada cita
+- **Botones Interactivos**: Pacientes pueden confirmar o cancelar con botones simples
+- **Respuestas Diferenciadas**: 
+  - ✅ Confirmar: "Muchas gracias por ayudarnos a mejorar nuestra atención!"
+  - ❌ Cancelar: "Desea que le demos una nueva cita"
+- **Monitoreo en Tiempo Real**: Panel de control para ver mensajes enviados y respuestas recibidas
+- **Gestión de Reprogramaciones**: Ofertas automáticas de nuevas fechas cuando se cancelan citas
+- **Estadísticas Completas**: Seguimiento de confirmaciones, cancelaciones y actividad
+- **Pruebas Integradas**: Sistema de testing para validar el funcionamiento completo
 
 ### 📄 Gestión de Documentos
 - **Plantillas de Mensajes**: Plantillas personalizables para respuestas frecuentes
@@ -112,6 +122,13 @@ Una aplicación web completa para la gestión integral de la clínica dental Rub
 - **Gráficos**: Canvas API para visualización de datos
 - **Almacenamiento**: LocalStorage para persistencia local
 
+### 🆕 Sistema de Confirmación Avanzado
+- **Automatización Temporal**: Sistema de envío automático basado en fecha/hora
+- **Procesamiento de Respuestas**: Análisis de texto y respuestas diferenciadas
+- **Monitoreo en Tiempo Real**: Panel de control con actualizaciones live
+- **Integración Bidireccional**: Comunicación directa con SQL Server
+- **Sistema de Pruebas**: Framework completo para testing automatizado
+
 ### 📱 Funcionalidades Móviles
 - **Navegación Adaptiva**: Sidebar colapsible en móvil
 - **Touch Optimized**: Elementos táctiles de tamaño adecuado
@@ -125,13 +142,17 @@ Una aplicación web completa para la gestión integral de la clínica dental Rub
 ├── styles/
 │   └── main.css              # Estilos principales
 ├── scripts/
-│   ├── main.js               # Funcionalidad principal
-│   ├── calendar.js           # Sistema de calendario (integrado SQL)
-│   ├── whatsapp.js           # Centro de mensajes
-│   ├── ai-agent.js           # Agente IA (confirmación bidireccional)
-│   ├── invoices.js           # Sistema de facturación
-│   ├── accounting.js         # Módulo de contabilidad
-│   ├── database-config.js    # Configuración SQL Server
+│   ├── main.js                          # Funcionalidad principal
+│   ├── calendar.js                      # Sistema de calendario (integrado SQL)
+│   ├── whatsapp.js                      # Centro de mensajes
+│   ├── ai-agent.js                      # Agente IA (confirmación bidireccional)
+│   ├── invoices.js                      # Sistema de facturación
+│   ├── accounting.js                    # Módulo de contabilidad
+│   ├── database-config.js               # Configuración SQL Server
+│   ├── database-manager.js              # Gestor de base de datos
+│   ├── appointment-confirmation-system.js  # Sistema de confirmación 24h
+│   ├── confirmation-ui-helpers.js       # Funciones de interfaz
+│   ├── confirmation-test.js             # Framework de pruebas
 │   ├── database-manager.js   # Manager de base de datos
 │   └── confirmation-test.js  # Script de pruebas bidireccionales
 ├── imgs/
