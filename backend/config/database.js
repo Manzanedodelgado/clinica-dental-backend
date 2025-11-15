@@ -1,36 +1,132 @@
 /**
- * Configuración de Base de Datos SQL Server
- * Rubio García Dental Clinic Management System
+ * Configuración de Base de Datos - Multi-Platform
+ * Sistema de Gestión Dental - Clínica Rubio García
+ * 
+ * Soporta SQL Server (local) y PostgreSQL (cloud/Render.com)
  */
 
-const sql = require('mssql');
 require('dotenv').config();
 
 class DatabaseConfig {
     constructor() {
-        this.config = {
-            server: process.env.DB_SERVER,
-            database: process.env.DB_DATABASE,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            pool: {
-                max: 10,
-                min: 0,
-                idleTimeoutMillis: 30000
-            },
-            options: {
-                encrypt: process.env.DB_ENCRYPT === 'true',
-                trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
-                enableArithAbort: true,
-                useUTC: false
-            },
-            requestTimeout: 60000,
-            connectionTimeout: 60000,
-            server: process.env.DB_SERVER
-        };
-        
+        this.dbType = this.detectDatabaseType();
+        this.config = this.getConfig();
         this.pool = null;
         this.isConnected = false;
+        this.client = null;
+    }
+
+    /**
+     * Detectar tipo de base de datos según variables de entorno
+     */
+    detectDatabaseType() {
+        // Si es Render.com o cloud, usar PostgreSQL
+        if (process.env.DATABASE_URL || process.env.PGHOST || process.env.DB_TYPE === 'postgres') {
+            return 'postgres';
+        }
+        // Si tiene variables de SQL Server, usar SQL Server
+        if (process.env.DB_SERVER || process.env.DB_TYPE === 'sqlserver') {
+            return 'sqlserver';
+        }
+        // Por defecto SQL Server
+        return 'sqlserver';
+    }
+
+    /**
+     * Obtener configuración según el tipo de base de datos
+     */
+    getConfig() {
+        switch (this.dbType) {
+            case 'postgres':
+                return this.getPostgreSQLConfig();
+            case 'sqlserver':
+                return this.getSQLServerConfig();
+            default:
+                throw new Error(`Tipo de base de datos no soportado: ${this.dbType}`);
+        }
+    }
+
+    /**
+     * Configuración para PostgreSQL (Render.com, cloud)
+     */
+    getPostgreSQLConfig() {
+        // Render.com proporciona DATABASE_URL
+        if (process.env.DATABASE_URL) {
+            const { Pool } = require('pg');
+            return {
+                client: 'pg',
+                pool: new Pool({
+                    connectionString: process.env.DATABASE_URL,
+                    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+                    max: 20,
+                    idleTimeoutMillis: 30000,
+                    connectionTimeoutMillis: 2000,
+                }),
+                config: {
+                    user: process.env.DB_USER,
+                    host: process.env.DB_SERVER,
+                    database: process.env.DB_DATABASE,
+                    password: process.env.DB_PASSWORD,
+                    port: process.env.DB_PORT || 5432,
+                    ssl: process.env.NODE_ENV === 'production'
+                }
+            };
+        }
+
+        // Configuración manual de PostgreSQL
+        const { Pool } = require('pg');
+        return {
+            client: 'pg',
+            pool: new Pool({
+                user: process.env.DB_USER,
+                host: process.env.DB_SERVER,
+                database: process.env.DB_DATABASE,
+                password: process.env.DB_PASSWORD,
+                port: process.env.DB_PORT || 5432,
+                ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+                max: 20,
+                idleTimeoutMillis: 30000,
+                connectionTimeoutMillis: 2000,
+            }),
+            config: {
+                user: process.env.DB_USER,
+                host: process.env.DB_SERVER,
+                database: process.env.DB_DATABASE,
+                password: process.env.DB_PASSWORD,
+                port: process.env.DB_PORT || 5432,
+                ssl: process.env.NODE_ENV === 'production'
+            }
+        };
+    }
+
+    /**
+     * Configuración para SQL Server (local/desarrollo)
+     */
+    getSQLServerConfig() {
+        const sql = require('mssql');
+        return {
+            client: 'mssql',
+            pool: null, // Se inicializará cuando sea necesario
+            config: {
+                server: process.env.DB_SERVER || 'localhost',
+                database: process.env.DB_DATABASE || 'DentalClinicDB',
+                user: process.env.DB_USER || 'sa',
+                password: process.env.DB_PASSWORD || '',
+                pool: {
+                    max: 10,
+                    min: 0,
+                    idleTimeoutMillis: 30000
+                },
+                options: {
+                    encrypt: process.env.DB_ENCRYPT === 'true',
+                    trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
+                    enableArithAbort: true,
+                    useUTC: false
+                },
+                requestTimeout: 60000,
+                connectionTimeout: 60000
+            }
+        };
     }
 
     /**
@@ -38,19 +134,37 @@ class DatabaseConfig {
      */
     async createPool() {
         try {
-            this.pool = await sql.connect(this.config);
-            this.isConnected = true;
-            console.log('✅ Conectado a SQL Server:', process.env.DB_SERVER);
-            
+            if (this.dbType === 'postgres') {
+                // PostgreSQL ya está configurado
+                this.pool = this.config.pool;
+                this.client = require('pg');
+                this.isConnected = true;
+                console.log('✅ Conectado a PostgreSQL:', process.env.DB_SERVER || 'Render.com');
+            } else if (this.dbType === 'sqlserver') {
+                // SQL Server necesita inicialización
+                const sql = require('mssql');
+                this.pool = await sql.connect(this.config.config);
+                this.client = sql;
+                this.isConnected = true;
+                console.log('✅ Conectado a SQL Server:', process.env.DB_SERVER);
+            }
+
             // Configurar event listeners
-            this.pool.on('error', (err) => {
-                console.error('❌ Error en pool SQL Server:', err);
-                this.isConnected = false;
-            });
+            if (this.dbType === 'postgres') {
+                this.pool.on('error', (err) => {
+                    console.error('❌ Error en pool PostgreSQL:', err);
+                    this.isConnected = false;
+                });
+            } else if (this.dbType === 'sqlserver') {
+                this.pool.on('error', (err) => {
+                    console.error('❌ Error en pool SQL Server:', err);
+                    this.isConnected = false;
+                });
+            }
 
             return this.pool;
         } catch (error) {
-            console.error('❌ Error conectando a SQL Server:', error);
+            console.error(`❌ Error conectando a ${this.dbType}:`, error);
             this.isConnected = false;
             throw error;
         }
@@ -67,24 +181,17 @@ class DatabaseConfig {
     }
 
     /**
-     * Ejecutar consulta con pool
+     * Ejecutar consulta según el tipo de base de datos
      */
     async query(queryString, parameters = []) {
         try {
             const pool = await this.getPool();
-            const request = pool.request();
 
-            // Agregar parámetros si existen
-            parameters.forEach((param, index) => {
-                if (param.name && param.value !== undefined) {
-                    request.input(param.name, param.value);
-                } else {
-                    request.input(`param${index}`, param);
-                }
-            });
-
-            const result = await request.query(queryString);
-            return result;
+            if (this.dbType === 'postgres') {
+                return await this.executePostgreSQLQuery(pool, queryString, parameters);
+            } else if (this.dbType === 'sqlserver') {
+                return await this.executeSQLServerQuery(pool, queryString, parameters);
+            }
         } catch (error) {
             console.error('❌ Error ejecutando consulta:', error);
             throw error;
@@ -92,24 +199,98 @@ class DatabaseConfig {
     }
 
     /**
+     * Ejecutar consulta PostgreSQL
+     */
+    async executePostgreSQLQuery(pool, queryString, parameters) {
+        // Convertir parámetros de SQL Server a PostgreSQL
+        const pgQuery = this.convertQueryToPostgreSQL(queryString, parameters);
+        const result = await pool.query(pgQuery.query, pgQuery.values);
+        return { recordset: result.rows, rowsAffected: result.rowCount };
+    }
+
+    /**
+     * Ejecutar consulta SQL Server
+     */
+    async executeSQLServerQuery(pool, queryString, parameters) {
+        const request = pool.request();
+
+        // Agregar parámetros si existen
+        parameters.forEach((param, index) => {
+            if (param.name && param.value !== undefined) {
+                request.input(param.name, param.value);
+            } else {
+                request.input(`param${index}`, param);
+            }
+        });
+
+        const result = await request.query(queryString);
+        return result;
+    }
+
+    /**
+     * Convertir consultas de SQL Server a PostgreSQL
+     */
+    convertQueryToPostgreSQL(queryString, parameters) {
+        let pgQuery = queryString;
+
+        // Conversiones básicas de sintaxis
+        pgQuery = pgQuery.replace(/GETDATE\(\)/gi, 'CURRENT_TIMESTAMP');
+        pgQuery = pgQuery.replace(/SCOPE_IDENTITY\(\)/gi, 'RETURNING id');
+        pgQuery = pgQuery.replace(/TOP\s+\d+/gi, ''); // PostgreSQL usa LIMIT
+
+        // Convertir nombres de tablas a minúsculas
+        pgQuery = pgQuery.replace(/FROM\s+([A-Z][A-Za-z0-9_]+)/gi, (match, table) => {
+            return `FROM ${table.toLowerCase()}`;
+        });
+
+        // Convertir valores de parámetros
+        const values = parameters.map(param => {
+            if (param.value !== undefined) {
+                return param.value;
+            }
+            return param;
+        });
+
+        return { query: pgQuery, values };
+    }
+
+    /**
      * Ejecutar transacción
      */
     async transaction(callback) {
         const pool = await this.getPool();
-        const transaction = new sql.Transaction(pool);
-        
-        try {
-            await transaction.begin();
-            const request = new sql.Request(transaction);
+
+        if (this.dbType === 'postgres') {
+            const client = await pool.connect();
+            try {
+                await client.query('BEGIN');
+                const result = await callback({
+                    query: (text, params) => client.query(text, params)
+                });
+                await client.query('COMMIT');
+                return result;
+            } catch (error) {
+                await client.query('ROLLBACK');
+                console.error('❌ Error en transacción PostgreSQL:', error);
+                throw error;
+            } finally {
+                client.release();
+            }
+        } else if (this.dbType === 'sqlserver') {
+            const sql = require('mssql');
+            const transaction = new sql.Transaction(pool);
             
-            const result = await callback(request);
-            await transaction.commit();
-            
-            return result;
-        } catch (error) {
-            await transaction.rollback();
-            console.error('❌ Error en transacción:', error);
-            throw error;
+            try {
+                await transaction.begin();
+                const request = new sql.Request(transaction);
+                const result = await callback(request);
+                await transaction.commit();
+                return result;
+            } catch (error) {
+                await transaction.rollback();
+                console.error('❌ Error en transacción SQL Server:', error);
+                throw error;
+            }
         }
     }
 
@@ -118,8 +299,13 @@ class DatabaseConfig {
      */
     async testConnection() {
         try {
-            const result = await this.query('SELECT 1 as test');
-            console.log('✅ Prueba de conexión SQL Server exitosa');
+            if (this.dbType === 'postgres') {
+                const result = await this.query('SELECT 1 as test');
+                console.log('✅ Prueba de conexión PostgreSQL exitosa');
+            } else {
+                const result = await this.query('SELECT 1 as test');
+                console.log('✅ Prueba de conexión SQL Server exitosa');
+            }
             return true;
         } catch (error) {
             console.error('❌ Error en prueba de conexión:', error);
@@ -132,10 +318,14 @@ class DatabaseConfig {
      */
     async closePool() {
         if (this.pool) {
-            await this.pool.close();
+            if (this.dbType === 'postgres') {
+                await this.pool.end();
+            } else if (this.dbType === 'sqlserver') {
+                await this.pool.close();
+            }
             this.pool = null;
             this.isConnected = false;
-            console.log('🔌 Pool de conexiones SQL Server cerrado');
+            console.log(`🔌 Pool de conexiones ${this.dbType} cerrado`);
         }
     }
 
@@ -144,218 +334,94 @@ class DatabaseConfig {
      */
     getConnectionStatus() {
         return {
+            dbType: this.dbType,
             isConnected: this.isConnected,
-            server: this.config.server,
-            database: this.config.database,
+            server: this.config.config.host || this.config.config.server,
+            database: this.config.config.database,
             pool: this.pool ? {
-                connected: this.pool.connected,
-                connecting: this.pool.connecting,
-                err: this.pool.err ? this.pool.err.message : null
+                totalCount: this.pool.totalCount || 'N/A',
+                idleCount: this.pool.idleCount || 'N/A',
+                waitingCount: this.pool.waitingCount || 'N/A'
             } : null
         };
     }
+
+    /**
+     * Obtener configuración de base de datos específica
+     */
+    getDatabaseConfig() {
+        return this.config.config;
+    }
+
+    /**
+     * Obtener queries adaptadas al tipo de base de datos
+     */
+    getAdaptedQueries() {
+        if (this.dbType === 'postgres') {
+            return this.getPostgreSQLQueries();
+        } else {
+            return this.getSQLServerQueries();
+        }
+    }
+
+    /**
+     * Queries adaptadas para PostgreSQL
+     */
+    getPostgreSQLQueries() {
+        return {
+            // Citas
+            GET_APPOINTMENTS: `
+                SELECT 
+                    a.*,
+                    p.firstname,
+                    p.lastname,
+                    p.phone,
+                    p.email,
+                    p.dateofbirth
+                FROM dcitas a
+                LEFT JOIN dpatients p ON a.patientid = p.patientid
+                WHERE ($1::date IS NULL OR a.appointmentdate = $1::date)
+                AND ($2::integer IS NULL OR a.idsitc = $2)
+                ORDER BY a.appointmentdate DESC, a.appointmenttime ASC
+            `,
+            
+            CREATE_APPOINTMENT: `
+                INSERT INTO dcitas (
+                    patientid, appointmentdate, appointmenttime, duration, 
+                    idic, texto, idus, idsitc, notas
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                RETURNING citaid
+            `,
+
+            GET_PATIENTS: `
+                SELECT * FROM dpatients
+                WHERE ($1::text IS NULL OR firstname ILIKE '%' || $1 || '%' 
+                    OR lastname ILIKE '%' || $1 || '%' 
+                    OR phone ILIKE '%' || $1 || '%')
+                ORDER BY lastname, firstname
+            `
+        };
+    }
+
+    /**
+     * Queries para SQL Server (ya están en el archivo original)
+     */
+    getSQLServerQueries() {
+        return require('./sql-queries');
+    }
 }
-
-// Queries predefinidas para operaciones comunes
-const SQL_QUERIES = {
-    // Citas (DCitas)
-    GET_APPOINTMENTS: `
-        SELECT 
-            a.*,
-            p.FirstName,
-            p.LastName,
-            p.Phone,
-            p.Email,
-            p.DateOfBirth
-        FROM DCitas a
-        LEFT JOIN DPatients p ON a.PatientID = p.PatientID
-        WHERE (@date IS NULL OR a.Date = @date)
-        AND (@status IS NULL OR a.Status = @status)
-        ORDER BY a.Date DESC, a.Time ASC
-    `,
-    
-    GET_APPOINTMENT_BY_ID: `
-        SELECT 
-            a.*,
-            p.FirstName,
-            p.LastName,
-            p.Phone,
-            p.Email,
-            p.DateOfBirth
-        FROM DCitas a
-        LEFT JOIN DPatients p ON a.PatientID = p.PatientID
-        WHERE a.CitaID = @appointmentId
-    `,
-    
-    CREATE_APPOINTMENT: `
-        INSERT INTO DCitas (
-            PatientID, Date, Time, Duration, Treatment, 
-            Status, Notes, CreatedAt, UpdatedAt
-        )
-        VALUES (
-            @patientId, @date, @time, @duration, @treatment,
-            @status, @notes, GETDATE(), GETDATE()
-        )
-        SELECT SCOPE_IDENTITY() as CitaID
-    `,
-    
-    UPDATE_APPOINTMENT: `
-        UPDATE DCitas SET
-            Date = @date,
-            Time = @time,
-            Duration = @duration,
-            Treatment = @treatment,
-            Status = @status,
-            Notes = @notes,
-            UpdatedAt = GETDATE()
-        WHERE CitaID = @appointmentId
-    `,
-    
-    DELETE_APPOINTMENT: `
-        DELETE FROM DCitas WHERE CitaID = @appointmentId
-    `,
-    
-    UPDATE_APPOINTMENT_STATUS: `
-        UPDATE DCitas SET
-            Status = @status,
-            UpdatedAt = GETDATE()
-        WHERE CitaID = @appointmentId
-    `,
-    
-    GET_PENDING_AUTOMATIONS: `
-        SELECT 
-            a.*,
-            p.FirstName,
-            p.LastName,
-            p.Phone,
-            p.Email
-        FROM DCitas a
-        LEFT JOIN DPatients p ON a.PatientID = p.PatientID
-        WHERE a.Status = 'Planificada'
-        AND a.Date >= CAST(GETDATE() AS DATE)
-        AND a.Date <= DATEADD(DAY, 1, CAST(GETDATE() AS DATE))
-        AND NOT EXISTS (
-            SELECT 1 FROM DAutomationLogs al 
-            WHERE al.AppointmentID = a.CitaID 
-            AND al.ActionType = 'confirmation_sent'
-            AND al.CreatedAt >= DATEADD(DAY, -1, GETDATE())
-        )
-        ORDER BY a.Date ASC, a.Time ASC
-    `,
-
-    // Pacientes (DPatients)
-    GET_PATIENTS: `
-        SELECT * FROM DPatients
-        WHERE (@search IS NULL OR FirstName LIKE '%' + @search + '%' OR LastName LIKE '%' + @search + '%' OR Phone LIKE '%' + @search + '%')
-        ORDER BY LastName, FirstName
-    `,
-    
-    CREATE_PATIENT: `
-        INSERT INTO DPatients (
-            FirstName, LastName, Phone, Email, DateOfBirth, 
-            Address, CreatedAt, UpdatedAt
-        )
-        VALUES (
-            @firstName, @lastName, @phone, @email, @dateOfBirth,
-            @address, GETDATE(), GETDATE()
-        )
-        SELECT SCOPE_IDENTITY() as PatientID
-    `,
-    
-    UPDATE_PATIENT: `
-        UPDATE DPatients SET
-            FirstName = @firstName,
-            LastName = @lastName,
-            Phone = @phone,
-            Email = @email,
-            DateOfBirth = @dateOfBirth,
-            Address = @address,
-            UpdatedAt = GETDATE()
-        WHERE PatientID = @patientId
-    `,
-
-    // Documentos Legales (DLegalDocuments)
-    CREATE_LEGAL_DOCUMENT: `
-        INSERT INTO DLegalDocuments (
-            PatientID, CitaID, DocumentType, DocumentContent,
-            Accepted, AcceptedAt, IPAddress, UserAgent,
-            Version, CreatedAt
-        )
-        VALUES (
-            @patientId, @appointmentId, @documentType, @documentContent,
-            @accepted, @acceptedAt, @ipAddress, @userAgent,
-            @version, GETDATE()
-        )
-        SELECT SCOPE_IDENTITY() as DocumentID
-    `,
-    
-    GET_LEGAL_DOCUMENTS: `
-        SELECT * FROM DLegalDocuments
-        WHERE (@patientId IS NULL OR PatientID = @patientId)
-        AND (@appointmentId IS NULL OR CitaID = @appointmentId)
-        AND (@documentType IS NULL OR DocumentType = @documentType)
-        ORDER BY CreatedAt DESC
-    `,
-
-    // Cuestionarios (DQuestionnaireResponses)
-    CREATE_QUESTIONNAIRE_RESPONSE: `
-        INSERT INTO DQuestionnaireResponses (
-            PatientID, CitaID, QuestionnaireType, Responses,
-            LOPDAccepted, LOPDAcceptedAt, CreatedAt
-        )
-        VALUES (
-            @patientId, @appointmentId, @questionnaireType, @responses,
-            @lopdAccepted, @lopdAcceptedAt, GETDATE()
-        )
-        SELECT SCOPE_IDENTITY() as ResponseID
-    `,
-    
-    GET_QUESTIONNAIRE_RESPONSES: `
-        SELECT * FROM DQuestionnaireResponses
-        WHERE (@patientId IS NULL OR PatientID = @patientId)
-        AND (@appointmentId IS NULL OR CitaID = @appointmentId)
-        ORDER BY CreatedAt DESC
-    `,
-
-    // Flujos de Automatización (DAutomationFlows)
-    CREATE_AUTOMATION_FLOW: `
-        INSERT INTO DAutomationFlows (
-            AppointmentID, FlowType, FlowConfig, CurrentStep,
-            Status, CreatedAt
-        )
-        VALUES (
-            @appointmentId, @flowType, @flowConfig, @currentStep,
-            @status, GETDATE()
-        )
-        SELECT SCOPE_IDENTITY() as FlowID
-    `,
-    
-    UPDATE_AUTOMATION_FLOW: `
-        UPDATE DAutomationFlows SET
-            CurrentStep = @currentStep,
-            Status = @status,
-            UpdatedAt = GETDATE()
-        WHERE FlowID = @flowId
-    `,
-
-    // Log de Automatizaciones (DAutomationLogs)
-    CREATE_AUTOMATION_LOG: `
-        INSERT INTO DAutomationLogs (
-            AppointmentID, FlowID, ActionType, ActionData,
-            Success, ErrorMessage, CreatedAt
-        )
-        VALUES (
-            @appointmentId, @flowId, @actionType, @actionData,
-            @success, @errorMessage, GETDATE()
-        )
-    `
-};
 
 // Crear instancia singleton
 const dbConfig = new DatabaseConfig();
 
+// Queries originales para SQL Server (mantener compatibilidad)
+const SQL_QUERIES = {
+    // Se mantendrán las queries originales aquí
+    // Se pueden migrar gradualmente al nuevo sistema
+};
+
 module.exports = {
     dbConfig,
-    sql,
     SQL_QUERIES
 };

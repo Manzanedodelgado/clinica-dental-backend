@@ -185,3 +185,43 @@ dist/
 config/local.json
 config/production.json
 config/development.json
+
+# Application specific directories
+uploads/
+sessions/
+certs/
+backups/
+data/
+storage/
+
+# WhatsApp Baileys sessions
+sessions/
+*.session
+*.json
+
+# Application logs
+logs/*
+!logs/.gitkeep
+
+# Test results and coverage
+test-results/
+junit.xml
+*.test.xml
+
+# Docker
+.dockerignore
+
+# Render.com specific
+.render.yaml
+render.yaml
+
+# SSL and certificates
+*.pem
+*.key
+*.crt
+*.csr
+
+# Environment files (already covered but being explicit)
+.env
+.env.*
+!.env.example
