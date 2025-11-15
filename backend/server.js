@@ -26,6 +26,7 @@ const questionnaireRoutes = require('./routes/questionnaires');
 const automationRoutes = require('./routes/automation');
 const systemRoutes = require('./routes/system');
 const whatsappRoutes = require('./routes/whatsapp');
+const conversationRoutes = require('./routes/conversations');
 const invoiceRoutes = require('./routes/invoices');
 const accountingRoutes = require('./routes/accounting');
 const doctorRoutes = require('./routes/doctors');
@@ -264,6 +265,7 @@ app.use('/api/questionnaires', questionnaireRoutes);
 app.use('/api/automation', automationRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/whatsapp/conversations', conversationRoutes); // Conversaciones y codificación
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/accounting', accountingRoutes);
 app.use('/api/doctors', doctorRoutes);

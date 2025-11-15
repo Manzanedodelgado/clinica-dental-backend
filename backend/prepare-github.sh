@@ -49,6 +49,12 @@ required_files=(
     "README.md"
     "server.js"
     "config/database.js"
+    "controllers/conversationController.js"
+    "controllers/conversation-integration.js"
+    "routes/conversations.js"
+    "scripts/whatsapp-conversations.sql"
+    "scripts/init-database.sql"
+    "whatsapp-panel.html"
 )
 
 missing_files=()
@@ -75,6 +81,7 @@ files_to_remove=(
     "node_modules/"
     "logs/"
     "sessions/"
+    "auth_info_baileys/"
     "uploads/"
     "certs/"
     "data/"
