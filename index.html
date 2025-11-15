@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubio García Dental - Sistema de Gestión</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <img src="imgs/logo.svg" alt="Rubio García Dental" class="loading-logo">
+            <h2>Cargando Sistema de Gestión</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen hidden">
+        <div class="login-container">
+            <div class="login-header">
+                <img src="imgs/logo.svg" alt="Rubio García Dental" class="login-logo">
+                <h1>Acceso al Sistema</h1>
+                <p>Sistema de Gestión Clínica</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" name="username" placeholder="Introduce tu usuario" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Introduce tu contraseña" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+            </form>
+            <div class="login-footer">
+                <p><strong>Usuario:</strong> JMD | <strong>Clave:</strong> 190582</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="main-app hidden">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="imgs/logo.svg" alt="Rubio García Dental" class="sidebar-logo">
+                <span class="sidebar-title">Rubio García Dental</span>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="menu-item active">
+                    <a href="#" data-section="home">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Panel de Control</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" data-section="agenda">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Agenda</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" data-section="pacientes">
+                        <i class="fas fa-users"></i>
+                        <span>Pacientes</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" data-section="whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" data-section="agente-ia">
+                        <i class="fas fa-robot"></i>
+                        <span>Agente IA</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" data-section="documentos">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Documentos</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" data-section="facturas">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>Facturas</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" data-section="contabilidad">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Contabilidad</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" data-section="configuracion">
+                        <i class="fas fa-cog"></i>
+                        <span>Configuración</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span id="currentSection">Panel de Control</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Juan Antonio Manzanedo</span>
+                        <button class="btn btn-sm btn-outline" id="logoutBtn">Cerrar Sesión</button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Sections -->
+            <div class="content-area">
+                
+                <!-- Home Section -->
+                <section id="home" class="content-section active">
+                    <div class="section-header">
+                        <h1>Panel de Control</h1>
+                        <p>Resumen general de la clínica</p>
+                    </div>
+                    
+                    <div class="dashboard-grid">
+                        <!-- Today's Appointments -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-calendar-day"></i> Citas de Hoy</h3>
+                                <span class="card-badge">12 citas</span>
+                            </div>
+                            <div class="card-content">
+                                <div class="appointment-list" id="todayAppointments">
+                                    <!-- Appointments will be populated by JavaScript -->
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="#" data-section="agenda" class="btn btn-link">Ver todas las citas</a>
+                            </div>
+                        </div>
+
+                        <!-- Urgent Messages -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-exclamation-triangle"></i> Mensajes Urgentes</h3>
+                                <span class="card-badge warning">3 mensajes</span>
+                            </div>
+                            <div class="card-content">
+                                <div class="message-list" id="urgentMessages">
+                                    <!-- Urgent messages will be populated by JavaScript -->
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="#" data-section="whatsapp" class="btn btn-link">Ver todos los mensajes</a>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-bolt"></i> Acciones Rápidas</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="quick-actions">
+                                    <button class="action-btn" data-action="new-appointment">
+                                        <i class="fas fa-plus"></i>
+                                        <span>Nueva Cita</span>
+                                    </button>
+                                    <button class="action-btn" data-action="new-patient">
+                                        <i class="fas fa-user-plus"></i>
+                                        <span>Nuevo Paciente</span>
+                                    </button>
+                                    <button class="action-btn" data-action="send-message">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span>Enviar Mensaje</span>
+                                    </button>
+                                    <button class="action-btn" data-action="new-invoice">
+                                        <i class="fas fa-file-invoice"></i>
+                                        <span>Nueva Factura</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Statistics -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-chart-bar"></i> Estadísticas del Día</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="stats-grid">
+                                    <div class="stat-item">
+                                        <div class="stat-number">24</div>
+                                        <div class="stat-label">Citas Completadas</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-number">€2,340</div>
+                                        <div class="stat-label">Ingresos del Día</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-number">8</div>
+                                        <div class="stat-label">Nuevos Pacientes</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-number">98%</div>
+                                        <div class="stat-label">Satisfacción</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Agenda Section -->
+                <section id="agenda" class="content-section">
+                    <div class="section-header">
+                        <h1>Agenda de Citas</h1>
+                        <div class="section-controls">
+                            <div class="view-controls">
+                                <button class="btn btn-sm" data-view="day">Día</button>
+                                <button class="btn btn-sm" data-view="week">Semana</button>
+                                <button class="btn btn-sm active" data-view="month">Mes</button>
+                            </div>
+                            <button class="btn btn-primary" id="newAppointmentBtn">
+                                <i class="fas fa-plus"></i> Nueva Cita
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <h2 id="calendarTitle">Diciembre 2024</h2>
+                            <div class="calendar-nav">
+                                <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                                <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid">
+                            <!-- Calendar will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Pacientes Section -->
+                <section id="pacientes" class="content-section">
+                    <div class="section-header">
+                        <h1>Base de Datos de Pacientes</h1>
+                        <div class="section-controls">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="patientSearch" placeholder="Buscar pacientes...">
+                            </div>
+                            <button class="btn btn-primary" id="newPatientBtn">
+                                <i class="fas fa-plus"></i> Nuevo Paciente
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="patients-container">
+                        <div class="patients-list" id="patientsList">
+                            <!-- Patients will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- WhatsApp Section -->
+                <section id="whatsapp" class="content-section">
+                    <div class="section-header">
+                        <h1>Centro de Mensajes WhatsApp</h1>
+                        <div class="section-controls">
+                            <button class="btn btn-primary" id="newMessageBtn">
+                                <i class="fas fa-plus"></i> Nuevo Mensaje
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="whatsapp-container">
+                        <div class="whatsapp-sidebar">
+                            <div class="chat-list" id="chatList">
+                                <!-- Chat list will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        <div class="whatsapp-main">
+                            <div class="chat-header" id="chatHeader">
+                                <div class="chat-info">
+                                    <h3>Selecciona una conversación</h3>
+                                </div>
+                            </div>
+                            <div class="chat-messages" id="chatMessages">
+                                <div class="no-chat-selected">
+                                    <i class="fab fa-whatsapp"></i>
+                                    <h3>Selecciona una conversación para empezar</h3>
+                                    <p>Elige un paciente de la lista para ver el historial de mensajes</p>
+                                </div>
+                            </div>
+                            <div class="chat-input-container" id="chatInputContainer" style="display: none;">
+                                <div class="chat-input">
+                                    <button class="input-btn" id="attachFile">
+                                        <i class="fas fa-paperclip"></i>
+                                    </button>
+                                    <input type="text" id="messageInput" placeholder="Escribe un mensaje...">
+                                    <button class="input-btn" id="sendMessage">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Agente IA Section -->
+                <section id="agente-ia" class="content-section">
+                    <div class="section-header">
+                        <h1>Agente IA - Automatización</h1>
+                        <div class="section-controls">
+                            <div class="ai-status" id="aiStatus">
+                                <span class="status-indicator active"></span>
+                                <span>IA Activa</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ai-container">
+                        <div class="ai-config">
+                            <div class="config-section">
+                                <h3>Configuración del Comportamiento</h3>
+                                <div class="form-group">
+                                    <label>Estilo de Respuesta</label>
+                                    <select id="aiResponseStyle">
+                                        <option value="professional">Profesional</option>
+                                        <option value="friendly">Amigable</option>
+                                        <option value="formal">Formal</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tono de Comunicación</label>
+                                    <select id="aiCommunicationTone">
+                                        <option value="calm">Tranquilo</option>
+                                        <option value="enthusiastic">Entusiasta</option>
+                                        <option value="empathetic">Empático</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="config-section">
+                                <h3>Automatizaciones Activas</h3>
+                                <div class="automation-list" id="activeAutomations">
+                                    <!-- Automations will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ai-monitor">
+                            <div class="monitor-section">
+                                <h3>Actividad Reciente</h3>
+                                <div class="activity-log" id="aiActivityLog">
+                                    <!-- Activity will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Documentos Section -->
+                <section id="documentos" class="content-section">
+                    <div class="section-header">
+                        <h1>Gestión de Documentos</h1>
+                        <div class="section-controls">
+                            <button class="btn btn-primary" id="newDocumentBtn">
+                                <i class="fas fa-plus"></i> Nuevo Documento
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="documents-container">
+                        <div class="documents-tabs">
+                            <button class="tab-btn active" data-tab="plantillas">Plantillas de Mensajes</button>
+                            <button class="tab-btn" data-tab="cuestionarios">Cuestionarios</button>
+                            <button class="tab-btn" data-tab="consentimientos">Consentimientos</button>
+                            <button class="tab-btn" data-tab="otros">Otros Documentos</button>
+                        </div>
+
+                        <div class="tab-content">
+                            <div id="plantillas" class="tab-panel active">
+                                <div class="documents-grid" id="templatesList">
+                                    <!-- Templates will be populated by JavaScript -->
+                                </div>
+                            </div>
+                            <div id="cuestionarios" class="tab-panel">
+                                <div class="documents-grid" id="questionnairesList">
+                                    <!-- Questionnaires will be populated by JavaScript -->
+                                </div>
+                            </div>
+                            <div id="consentimientos" class="tab-panel">
+                                <div class="documents-grid" id="consentsList">
+                                    <!-- Consents will be populated by JavaScript -->
+                                </div>
+                            </div>
+                            <div id="otros" class="tab-panel">
+                                <div class="documents-grid" id="othersList">
+                                    <!-- Others will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Facturas Section -->
+                <section id="facturas" class="content-section">
+                    <div class="section-header">
+                        <h1>Facturación Verifactu</h1>
+                        <div class="section-controls">
+                            <button class="btn btn-primary" id="newInvoiceBtn">
+                                <i class="fas fa-plus"></i> Nueva Factura
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="invoices-container">
+                        <div class="invoices-filters">
+                            <div class="filter-group">
+                                <input type="text" id="invoiceSearch" placeholder="Buscar facturas...">
+                                <select id="invoiceStatus">
+                                    <option value="">Todos los estados</option>
+                                    <option value="pending">Pendiente</option>
+                                    <option value="sent">Enviada</option>
+                                    <option value="paid">Pagada</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="invoices-list" id="invoicesList">
+                            <!-- Invoices will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Contabilidad Section -->
+                <section id="contabilidad" class="content-section">
+                    <div class="section-header">
+                        <h1>Módulo de Contabilidad</h1>
+                        <div class="section-controls">
+                            <select id="accountingPeriod">
+                                <option value="current-month">Mes Actual</option>
+                                <option value="last-month">Mes Anterior</option>
+                                <option value="current-year">Año Actual</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="accounting-container">
+                        <div class="accounting-dashboard">
+                            <div class="summary-cards">
+                                <div class="summary-card">
+                                    <h3>Total Facturado</h3>
+                                    <div class="amount">€34,560</div>
+                                    <div class="change positive">+12.5% vs mes anterior</div>
+                                </div>
+                                <div class="summary-card">
+                                    <h3>Pagos Pendientes</h3>
+                                    <div class="amount">€8,230</div>
+                                    <div class="change neutral">Sin cambios</div>
+                                </div>
+                                <div class="summary-card">
+                                    <h3>Gastos del Mes</h3>
+                                    <div class="amount">€12,890</div>
+                                    <div class="change negative">+8.2% vs mes anterior</div>
+                                </div>
+                                <div class="summary-card">
+                                    <h3>Beneficio Neto</h3>
+                                    <div class="amount">€21,670</div>
+                                    <div class="change positive">+15.3% vs mes anterior</div>
+                                </div>
+                            </div>
+
+                            <div class="charts-section">
+                                <div class="chart-container">
+                                    <h3>Ingresos por Tratamiento</h3>
+                                    <canvas id="incomeChart"></canvas>
+                                </div>
+                                <div class="chart-container">
+                                    <h3>Evolución Mensual</h3>
+                                    <canvas id="monthlyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Configuración Section -->
+                <section id="configuracion" class="content-section">
+                    <div class="section-header">
+                        <h1>Configuración del Sistema</h1>
+                    </div>
+
+                    <div class="config-container">
+                        <div class="config-tabs">
+                            <button class="config-tab-btn active" data-tab="users">Usuarios y Permisos</button>
+                            <button class="config-tab-btn" data-tab="clinic">Datos de la Clínica</button>
+                            <button class="config-tab-btn" data-tab="integration">Integraciones</button>
+                            <button class="config-tab-btn" data-tab="backup">Respaldos</button>
+                        </div>
+
+                        <div class="config-content">
+                            <div id="users" class="config-panel active">
+                                <div class="user-management">
+                                    <h3>Gestión de Usuarios</h3>
+                                    <div class="user-list" id="userList">
+                                        <!-- Users will be populated by JavaScript -->
+                                    </div>
+                                    <button class="btn btn-primary" id="addUserBtn">
+                                        <i class="fas fa-plus"></i> Agregar Usuario
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="clinic" class="config-panel">
+                                <form id="clinicForm" class="config-form">
+                                    <div class="form-group">
+                                        <label>Nombre de la Clínica</label>
+                                        <input type="text" value="Rubio García Dental" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Dirección</label>
+                                        <input type="text" value="Calle Example, 123" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Teléfono</label>
+                                        <input type="tel" value="+34 912 345 678" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="email" value="info@rubiogarciadental.com" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>NIF/CIF</label>
+                                        <input type="text" value="12345678A" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                </form>
+                            </div>
+
+                            <div id="integration" class="config-panel">
+                                <h3>Configuración de Integraciones</h3>
+                                <div class="integration-list">
+                                    <div class="integration-item">
+                                        <div class="integration-info">
+                                            <h4>Base de Datos Local</h4>
+                                            <p>Sincronización con agenda local</p>
+                                        </div>
+                                        <div class="integration-status">
+                                            <span class="status-indicator active"></span>
+                                            <span>Conectado</span>
+                                        </div>
+                                    </div>
+                                    <div class="integration-item">
+                                        <div class="integration-info">
+                                            <h4>AEAT Verifactu</h4>
+                                            <p>Cumplimiento normativa española</p>
+                                        </div>
+                                        <div class="integration-status">
+                                            <span class="status-indicator active"></span>
+                                            <span>Configurado</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="backup" class="config-panel">
+                                <h3>Respaldos del Sistema</h3>
+                                <div class="backup-controls">
+                                    <button class="btn btn-primary" id="createBackup">
+                                        <i class="fas fa-download"></i> Crear Respaldo
+                                    </button>
+                                    <button class="btn btn-outline" id="restoreBackup">
+                                        <i class="fas fa-upload"></i> Restaurar Respaldo
+                                    </button>
+                                </div>
+                                <div class="backup-list" id="backupList">
+                                    <!-- Backup list will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modalContainer">
+        <!-- New Appointment Modal -->
+        <div id="appointmentModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Nueva Cita</h2>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <form id="appointmentForm" class="modal-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Paciente</label>
+                            <select name="patient" required>
+                                <option value="">Seleccionar paciente</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha</label>
+                            <input type="date" name="date" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Hora</label>
+                            <input type="time" name="time" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Duración</label>
+                            <select name="duration" required>
+                                <option value="30">30 minutos</option>
+                                <option value="60">1 hora</option>
+                                <option value="90">1.5 horas</option>
+                                <option value="120">2 horas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tratamiento</label>
+                        <select name="treatment" required>
+                            <option value="">Seleccionar tratamiento</option>
+                            <option value="consulta">Consulta General</option>
+                            <option value="limpieza">Limpieza Dental</option>
+                            <option value="implante">Implante</option>
+                            <option value="ortodoncia">Ortodoncia</option>
+                            <option value="endodoncia">Endodoncia</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Notas</label>
+                        <textarea name="notes" rows="3" placeholder="Notas adicionales..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-outline modal-close">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Cita</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- New Patient Modal -->
+        <div id="patientModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Nuevo Paciente</h2>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <form id="patientForm" class="modal-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Apellidos</label>
+                            <input type="text" name="surname" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="tel" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección</label>
+                        <input type="text" name="address">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha de Nacimiento</label>
+                            <input type="date" name="birthDate">
+                        </div>
+                        <div class="form-group">
+                            <label>DNI</label>
+                            <input type="text" name="dni">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Notas Médicas</label>
+                        <textarea name="medicalNotes" rows="3" placeholder="Alergias, medicación, etc."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-outline modal-close">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Paciente</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Invoice Modal -->
+        <div id="invoiceModal" class="modal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h2>Nueva Factura</h2>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <form id="invoiceForm" class="modal-form">
+                    <div class="invoice-preview">
+                        <div class="invoice-header">
+                            <div class="clinic-info">
+                                <h3>Rubio García Dental</h3>
+                                <p>Calle Example, 123</p>
+                                <p>Tel: +34 912 345 678</p>
+                                <p>NIF: 12345678A</p>
+                            </div>
+                            <div class="invoice-title">
+                                <h2>FACTURA</h2>
+                                <div class="invoice-number">
+                                    <label>Número:</label>
+                                    <input type="text" name="invoiceNumber" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="invoice-customer">
+                            <div class="customer-info">
+                                <h4>Datos del Cliente</h4>
+                                <input type="text" name="customerName" placeholder="Nombre del cliente" required>
+                                <input type="text" name="customerAddress" placeholder="Dirección">
+                                <input type="text" name="customerNif" placeholder="NIF/CIF">
+                            </div>
+                        </div>
+
+                        <div class="invoice-items">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Concepto</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio</th>
+                                        <th>IVA</th>
+                                        <th>Total</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoiceItems">
+                                    <tr>
+                                        <td><input type="text" name="concept[]" placeholder="Descripción del servicio"></td>
+                                        <td><input type="number" name="quantity[]" value="1" min="1"></td>
+                                        <td><input type="number" name="price[]" step="0.01" min="0"></td>
+                                        <td>
+                                            <select name="iva[]">
+                                                <option value="0">0%</option>
+                                                <option value="4">4%</option>
+                                                <option value="10">10%</option>
+                                                <option value="21" selected>21%</option>
+                                            </select>
+                                        </td>
+                                        <td class="item-total">0.00€</td>
+                                        <td><button type="button" class="btn-remove-item">&times;</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn btn-sm btn-outline" id="addItem">+ Agregar Línea</button>
+                        </div>
+
+                        <div class="invoice-totals">
+                            <div class="total-line">
+                                <span>Subtotal:</span>
+                                <span id="subtotal">0.00€</span>
+                            </div>
+                            <div class="total-line">
+                                <span>IVA:</span>
+                                <span id="totalIva">0.00€</span>
+                            </div>
+                            <div class="total-line total-final">
+                                <span>Total:</span>
+                                <span id="totalAmount">0.00€</span>
+                            </div>
+                        </div>
+
+                        <div class="verifactu-compliance">
+                            <div class="qr-placeholder">
+                                <div class="qr-code">QR Verifactu</div>
+                            </div>
+                            <div class="verifactu-text">
+                                <p><strong>Factura verificable en la sede electrónica de la AEAT</strong></p>
+                                <p>Código Hash: <span id="invoiceHash">Generando...</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-outline modal-close">Cancelar</button>
+                        <button type="button" class="btn btn-secondary" id="previewInvoice">Vista Previa</button>
+                        <button type="submit" class="btn btn-primary">Crear Factura</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/main.js"></script>
+    <script src="scripts/calendar.js"></script>
+    <script src="scripts/whatsapp.js"></script>
+    <script src="scripts/ai-agent.js"></script>
+    <script src="scripts/invoices.js"></script>
+    <script src="scripts/accounting.js"></script>
+</body>
+</html>

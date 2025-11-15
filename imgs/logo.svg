@@ -1,0 +1,21 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tooth/Implant Icon -->
+  <path d="M25 15 C25 10 30 8 35 8 C40 8 45 10 45 15 C45 20 40 22 35 22 C30 22 25 20 25 15 Z" fill="#333333"/>
+  <path d="M30 15 C30 17 32 19 35 19 C38 19 40 17 40 15 C40 13 38 11 35 11 C32 11 30 13 30 15 Z" fill="#666666"/>
+  
+  <!-- Implant threading -->
+  <path d="M35 22 L35 30 M33 24 L37 24 M33 26 L37 26 M33 28 L37 28 M33 30 L37 30" stroke="#333333" stroke-width="1" fill="none"/>
+  <path d="M35 30 L35 35" stroke="#333333" stroke-width="2"/>
+  
+  <!-- Text: RUBIO GARCÍA -->
+  <text x="55" y="20" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0F74A8">RUBIO GARCÍA</text>
+  
+  <!-- Text: DENTAL -->
+  <text x="55" y="35" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#333333">DENTAL</text>
+  
+  <!-- Decorative line -->
+  <line x1="55" y1="40" x2="180" y2="40" stroke="#333333" stroke-width="1"/>
+  
+  <!-- Slogan -->
+  <text x="55" y="52" font-family="Arial, sans-serif" font-size="10" fill="#666666">implantología y estética de vanguardia</text>
+</svg>
