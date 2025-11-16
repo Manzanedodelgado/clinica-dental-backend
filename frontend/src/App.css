@@ -1,0 +1,62 @@
+/* App.css - Estilos principales de la aplicación */
+@import url('./index.css');
+@import url('./components/Layout/Layout.css');
+@import url('./pages/Auth/Login.css');
+@import url('./pages/Dashboard/Dashboard.css');
+@import url('./pages/Patients/Patients.css');
+@import url('./pages/Common.css');
+
+.app {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Utilidades adicionales */
+.h-screen {
+  height: 100vh;
+}
+
+/* Estados de carga */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--neutral-200);
+  border-radius: 50%;
+  border-top-color: var(--primary-500);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Estados de hover para tarjetas */
+.hover-lift {
+  transition: transform var(--transition-normal);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Efectos de enfoque mejorados */
+.focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+/* Espaciado responsive */
+@media (max-width: 640px) {
+  .page-header {
+    margin-bottom: var(--spacing-xl);
+  }
+  
+  .stats-grid {
+    gap: var(--spacing-md);
+  }
+  
+  .patients-grid {
+    gap: var(--spacing-md);
+  }
+}

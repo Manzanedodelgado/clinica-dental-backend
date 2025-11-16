@@ -1,0 +1,141 @@
+/* Estilos globales para todas las páginas */
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-xxl);
+  gap: var(--spacing-lg);
+}
+
+.header-content h1 {
+  margin-bottom: var(--spacing-xs);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+/* Páginas "próximamente" */
+.coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxxl);
+  text-align: center;
+  background-color: var(--neutral-100);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--neutral-200);
+  box-shadow: var(--shadow-sm);
+  min-height: 400px;
+}
+
+.coming-soon-icon {
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-xl);
+  background-color: var(--primary-50);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.coming-soon h2 {
+  margin-bottom: var(--spacing-md);
+  color: var(--neutral-900);
+}
+
+.coming-soon p {
+  margin-bottom: var(--spacing-lg);
+  color: var(--neutral-600);
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-sm);
+  max-width: 600px;
+  text-align: left;
+}
+
+.features-list li {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background-color: var(--neutral-50);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--neutral-700);
+}
+
+.features-list li::before {
+  content: '✓';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background-color: var(--success-500);
+  color: white;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* Utilidades */
+.h-96 {
+  height: 24rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.text-center h3 {
+  text-align: center;
+}
+
+/* Responsive para páginas */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .header-actions {
+    justify-content: stretch;
+  }
+  
+  .header-actions .btn {
+    flex: 1;
+  }
+  
+  .coming-soon {
+    padding: var(--spacing-xl);
+    min-height: 300px;
+  }
+  
+  .coming-soon-icon {
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-lg);
+  }
+  
+  .features-list {
+    grid-template-columns: 1fr;
+  }
+}
