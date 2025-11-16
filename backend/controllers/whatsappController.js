@@ -15,7 +15,7 @@ const {
     useMultiFileAuthState,
     fetchLatestBaileysVersion
 } = baileys;
-const makeInMemoryStore = baileys.makeInMemoryStore;
+// makeInMemoryStore no está disponible directamente en Baileys 6.6.0
 const qrcode = require('qrcode-terminal');
 const fs = require('fs-extra');
 const path = require('path');
@@ -25,7 +25,7 @@ class WhatsAppBaileysController {
     constructor() {
         this.sock = null;
         this.authState = null;
-        this.store = makeInMemoryStore({ logger: console });
+        this.store = baileys.makeInMemoryStore ? baileys.makeInMemoryStore({ logger: console }) : null;
         this.isConnected = false;
         this.qrCode = null;
         this.messageQueue = [];
