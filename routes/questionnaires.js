@@ -319,7 +319,7 @@ router.put('/:id',
         }
         next();
     },
-    (req, res, next) => AuthMiddleware.logActivity('update_questionnaire', { questionnaireId: ':id' })(req, res, next),
+    AuthMiddleware.logActivity('update_questionnaire', { questionnaireId: ':id' }),
     async (req, res) => {
         try {
             const { id } = req.params;
