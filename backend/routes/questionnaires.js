@@ -319,7 +319,6 @@ router.put('/:id',
         }
         next();
     },
-    ],
     AuthMiddleware.logActivity('update_questionnaire', { questionnaireId: ':id' }),
     async (req, res) => {
         try {
