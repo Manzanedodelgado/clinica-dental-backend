@@ -40,14 +40,30 @@ router.get('/flows/:id',
  */
 router.post('/flows/:id/steps/:stepId/response', 
     AuthMiddleware.authenticateToken,
-    [
-        ValidationMiddleware.validateInput({
-            response: ValidationMiddleware.string().required(),
-            selectedOptions: ValidationMiddleware.array().items(ValidationMiddleware.string()).default([]),
-            freeText: ValidationMiddleware.string().allow('', null).default(''),
-            questionnaireResponses: ValidationMiddleware.object().allow(null).default(null)
-        })
-    ],
+    (req, res, next) => {
+        const Joi = require('joi');
+        const schema = Joi.object({
+            response: Joi.string().required(),
+            selectedOptions: Joi.array().items(Joi.string()).default([]),
+            freeText: Joi.string().allow('', null).default(''),
+            questionnaireResponses: Joi.object().allow(null).default(null)
+        });
+        
+        const { error } = schema.validate(req.body);
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                error: 'Datos de entrada inválidos',
+                code: 'VALIDATION_ERROR',
+                details: error.details.map(detail => ({
+                    field: detail.path.join('.'),
+                    message: detail.message,
+                    value: detail.context.value
+                }))
+            });
+        }
+        next();
+    },
     AuthMiddleware.logActivity('process_flow_step_response', { flowId: ':id', stepId: ':stepId' }),
     AutomationController.processFlowStepResponse
 );

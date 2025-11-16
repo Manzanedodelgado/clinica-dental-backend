@@ -56,12 +56,28 @@ router.get('/profile',
  */
 router.put('/change-password', 
     AuthMiddleware.authenticateToken,
-    [
-        ValidationMiddleware.validateInput({
-            currentPassword: ValidationMiddleware.string().min(6).required(),
-            newPassword: ValidationMiddleware.string().min(6).required()
-        })
-    ],
+    (req, res, next) => {
+        const Joi = require('joi');
+        const schema = Joi.object({
+            currentPassword: Joi.string().min(6).required(),
+            newPassword: Joi.string().min(6).required()
+        });
+        
+        const { error } = schema.validate(req.body);
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                error: 'Datos de entrada inválidos',
+                code: 'VALIDATION_ERROR',
+                details: error.details.map(detail => ({
+                    field: detail.path.join('.'),
+                    message: detail.message,
+                    value: detail.context.value
+                }))
+            });
+        }
+        next();
+    },
     AuthController.changePassword
 );
 

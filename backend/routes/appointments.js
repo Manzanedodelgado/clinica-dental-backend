@@ -76,12 +76,28 @@ router.delete('/:id',
  */
 router.put('/:id/status', 
     AuthMiddleware.authenticateToken,
-    [
-        ValidationMiddleware.validateInput({
-            status: ValidationMiddleware.string().valid('Planificada', 'Confirmada', 'Aceptada', 'Cancelada', 'Anula').required(),
-            reason: ValidationMiddleware.string().max(500).allow('', null).optional()
-        })
-    ],
+    (req, res, next) => {
+        const Joi = require('joi');
+        const schema = Joi.object({
+            status: Joi.string().valid('Planificada', 'Confirmada', 'Aceptada', 'Cancelada', 'Anula').required(),
+            reason: Joi.string().max(500).allow('', null).optional()
+        });
+        
+        const { error } = schema.validate(req.body);
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                error: 'Datos de entrada inválidos',
+                code: 'VALIDATION_ERROR',
+                details: error.details.map(detail => ({
+                    field: detail.path.join('.'),
+                    message: detail.message,
+                    value: detail.context.value
+                }))
+            });
+        }
+        next();
+    },
     AuthMiddleware.logActivity('update_appointment_status', { appointmentId: ':id' }),
     AppointmentController.updateAppointmentStatus
 );
@@ -117,11 +133,22 @@ router.get('/stats',
  */
 router.get('/date/:date', 
     AuthMiddleware.authenticateToken,
-    [
-        ValidationMiddleware.validateInput({
-            date: ValidationMiddleware.string().pattern(/^\d{4}-\d{2}-\d{2}$/).required()
-        })
-    ],
+    (req, res, next) => {
+        const Joi = require('joi');
+        const schema = Joi.object({
+            date: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).required()
+        });
+        
+        const { error } = schema.validate(req.params);
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                error: 'Fecha inválida. Formato requerido: YYYY-MM-DD',
+                code: 'INVALID_DATE_FORMAT'
+            });
+        }
+        next();
+    },
     AuthMiddleware.logActivity('get_appointments_by_date', { date: ':date' }),
     AppointmentController.getAppointments
 );
