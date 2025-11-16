@@ -12,6 +12,7 @@ import {
   FileText,
   MoreHorizontal
 } from 'lucide-react';
+import apiService from '../../services/api';
 
 const Patients = () => {
   const [patients, setPatients] = useState([]);
@@ -21,15 +22,52 @@ const Patients = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
 
   useEffect(() => {
-    // Simular carga de pacientes
     const loadPatients = async () => {
-      setLoading(true);
-      
-      setTimeout(() => {
-        const mockPatients = [
-          {
-            id: 1,
-            name: 'María García López',
+      try {
+        setLoading(true);
+        
+        const response = await apiService.getPatients();
+        if (response.success) {
+          setPatients(response.data);
+        }
+        
+      } catch (err) {
+        console.error('Error cargando pacientes:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPatients();
+  }, []);
+
+  // Filtrar pacientes cuando cambian searchTerm o filterStatus
+  useEffect(() => {
+    const loadFilteredPatients = async () => {
+      try {
+        setLoading(true);
+        
+        const params = {};
+        if (searchTerm) params.search = searchTerm;
+        if (filterStatus === 'consented') params.lopdStatus = 'consented';
+        if (filterStatus === 'not-consented') params.lopdStatus = 'not-consented';
+        
+        const response = await apiService.getPatients(params);
+        if (response.success) {
+          setPatients(response.data);
+        }
+        
+      } catch (err) {
+        console.error('Error filtrando pacientes:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFilteredPatients();
+  }, [searchTerm, filterStatus]);
+
+  const getStatusColor = (status) => {
             email: 'maria.garcia@email.com',
             phone: '+34 612 345 678',
             lastVisit: '2024-11-15',

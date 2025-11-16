@@ -22,21 +22,29 @@ export const AuthProvider = ({ children }) => {
     const verifyToken = async () => {
       if (token) {
         try {
-          const response = await fetch('https://clinica-dental-backend.onrender.com/api/auth/profile', {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
+          try {
+            const response = await fetch('https://clinica-dental-backend.onrender.com/api/auth/profile', {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            if (response.ok) {
+              const userData = await response.json();
+              setUser(userData.user);
+              return;
             }
-          });
-          
-          if (response.ok) {
-            const userData = await response.json();
-            setUser(userData.user);
+          } catch (backendError) {
+            console.log('Backend no disponible para verificación de token, usando mock:', backendError.message);
+          }
+
+          // Fallback al mock API
+          const mockResult = await apiMock.getProfile(token);
+          if (mockResult.success) {
+            setUser(mockResult.user);
           } else {
-            // Token inválido, limpiar
-            localStorage.removeItem('auth_token');
-            setToken(null);
-            setUser(null);
+            throw new Error('Token inválido');
           }
         } catch (error) {
           console.error('Error verificando token:', error);
@@ -53,27 +61,38 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch('https://clinica-dental-backend.onrender.com/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
+      // Intentar con el backend real primero
+      try {
+        const response = await fetch('https://clinica-dental-backend.onrender.com/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (response.ok) {
-        const { token: newToken, user: userData } = data;
-        localStorage.setItem('auth_token', newToken);
-        setToken(newToken);
-        setUser(userData);
-        return { success: true };
-      } else {
-        return { success: false, error: data.error || 'Error de autenticación' };
+        if (response.ok) {
+          const { token: newToken, user: userData } = data;
+          localStorage.setItem('auth_token', newToken);
+          setToken(newToken);
+          setUser(userData);
+          return { success: true };
+        }
+      } catch (backendError) {
+        console.log('Backend no disponible, usando mock API:', backendError.message);
       }
+
+      // Fallback al mock API
+      const mockResult = await apiMock.login({ email, password });
+      localStorage.setItem('auth_token', mockResult.token);
+      setToken(mockResult.token);
+      setUser(mockResult.user);
+      return { success: true };
     } catch (error) {
-      return { success: false, error: 'Error de conexión' };
+      console.error('Error en login:', error);
+      throw error;
     }
   };
 

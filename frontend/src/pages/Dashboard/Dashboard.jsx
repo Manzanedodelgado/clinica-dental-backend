@@ -9,60 +9,45 @@ import {
   AlertCircle,
   Activity
 } from 'lucide-react';
+import apiService from '../../services/api';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
     totalPatients: 0,
     todayAppointments: 0,
-    monthlyRevenue: 0,
-    pendingTasks: 0
+    monthlyIncome: 0,
+    pendingAppointments: 0,
+    completedThisWeek: 0,
+    newPatients: 0
   });
   const [recentAppointments, setRecentAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Simular carga de datos
     const loadDashboardData = async () => {
-      setLoading(true);
-      
-      // Simulación de datos
-      setTimeout(() => {
-        setStats({
-          totalPatients: 1247,
-          todayAppointments: 12,
-          monthlyRevenue: 45280,
-          pendingTasks: 8
-        });
+      try {
+        setLoading(true);
+        setError(null);
         
-        setRecentAppointments([
-          {
-            id: 1,
-            patient: 'María García',
-            time: '09:30',
-            doctor: 'Dr. López',
-            type: 'Revisión',
-            status: 'confirmed'
-          },
-          {
-            id: 2,
-            patient: 'Carlos Ruiz',
-            time: '10:15',
-            doctor: 'Dr. Martín',
-            type: 'Limpieza',
-            status: 'pending'
-          },
-          {
-            id: 3,
-            patient: 'Ana Torres',
-            time: '11:00',
-            doctor: 'Dr. López',
-            type: 'Consulta',
-            status: 'confirmed'
-          }
-        ]);
+        // Cargar estadísticas
+        const statsResponse = await apiService.getStats();
+        if (statsResponse.success) {
+          setStats(statsResponse.data);
+        }
         
+        // Cargar citas de hoy
+        const appointmentsResponse = await apiService.getAppointments({ date: 'today' });
+        if (appointmentsResponse.success) {
+          setRecentAppointments(appointmentsResponse.data.slice(0, 5)); // Solo las primeras 5
+        }
+        
+      } catch (err) {
+        console.error('Error cargando datos del dashboard:', err);
+        setError('Error cargando datos del dashboard');
+      } finally {
         setLoading(false);
-      }, 1000);
+      }
     };
 
     loadDashboardData();
