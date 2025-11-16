@@ -297,11 +297,28 @@ router.get('/first-visit',
  */
 router.put('/:id', 
     AuthMiddleware.authenticateToken,
-    [
-        ValidationMiddleware.validateInput({
-            responses: ValidationMiddleware.object().required(),
-            lopdAccepted: ValidationMiddleware.boolean().optional()
-        })
+    (req, res, next) => {
+        const Joi = require('joi');
+        const schema = Joi.object({
+            responses: Joi.object().required(),
+            lopdAccepted: Joi.boolean().optional()
+        });
+        
+        const { error } = schema.validate(req.body);
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                error: 'Datos de entrada inválidos',
+                code: 'VALIDATION_ERROR',
+                details: error.details.map(detail => ({
+                    field: detail.path.join('.'),
+                    message: detail.message,
+                    value: detail.context.value
+                }))
+            });
+        }
+        next();
+    },
     ],
     AuthMiddleware.logActivity('update_questionnaire', { questionnaireId: ':id' }),
     async (req, res) => {

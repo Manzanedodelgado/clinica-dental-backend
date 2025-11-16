@@ -224,16 +224,32 @@ router.post('/',
  */
 router.put('/:id', 
     AuthMiddleware.authenticateToken,
-    [
-        ValidationMiddleware.validateInput({
-            firstName: ValidationMiddleware.string().max(100).optional(),
-            lastName: ValidationMiddleware.string().max(100).optional(),
-            phone: ValidationMiddleware.string().pattern(/^[0-9]{9,15}$/).optional(),
-            email: ValidationMiddleware.string().email().max(255).optional(),
-            dateOfBirth: ValidationMiddleware.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional(),
-            address: ValidationMiddleware.string().max(500).allow('', null).optional()
-        })
-    ],
+    (req, res, next) => {
+        const Joi = require('joi');
+        const schema = Joi.object({
+            firstName: Joi.string().max(100).optional(),
+            lastName: Joi.string().max(100).optional(),
+            phone: Joi.string().pattern(/^[0-9]{9,15}$/).optional(),
+            email: Joi.string().email().max(255).optional(),
+            dateOfBirth: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional(),
+            address: Joi.string().max(500).allow('', null).optional()
+        }).min(1);
+        
+        const { error } = schema.validate(req.body);
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                error: 'Datos de entrada inválidos',
+                code: 'VALIDATION_ERROR',
+                details: error.details.map(detail => ({
+                    field: detail.path.join('.'),
+                    message: detail.message,
+                    value: detail.context.value
+                }))
+            });
+        }
+        next();
+    },
     AuthMiddleware.logActivity('update_patient', { patientId: ':id' }),
     async (req, res) => {
         try {
