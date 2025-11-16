@@ -8,7 +8,8 @@
 
 require('dotenv').config();
 const { dbConfig, SQL_QUERIES } = require('../config/database');
-const { 
+const baileys = require('@whiskeysockets/baileys');
+const {
     WhatsAppWebSc,
     makeWASocket,
     DisconnectReason,
@@ -19,10 +20,10 @@ const {
     generateWAMessage,
     generateWAMessageFromContent,
     downloadMediaMessage,
-    makeInMemoryStore,
     jidDecode,
-    encodeURIComponentStripped
-} = require('@whiskeysockets/baileys');
+    encodeURIComponentStripped,
+    makeInMemoryStore
+} = baileys;
 const qrcode = require('qrcode-terminal');
 const fs = require('fs-extra');
 const path = require('path');
