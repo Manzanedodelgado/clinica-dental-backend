@@ -11,6 +11,8 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const winston = require('winston');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 // Importar configuraciones
@@ -256,6 +258,22 @@ app.get('/api', (req, res) => {
     });
 });
 
+// ==============================================
+// CONFIGURACIÓN FRONTEND ESTÁTICO
+// ==============================================
+
+// Configurar directorio estático del frontend
+const frontendDir = path.join(__dirname, '../frontend/dist');
+
+// Verificar si existe el directorio del frontend
+if (fs.existsSync(frontendDir)) {
+    // Servir archivos estáticos del frontend
+    app.use(express.static(frontendDir));
+    logger.info('✅ Frontend estático configurado desde:', frontendDir);
+} else {
+    logger.warn('⚠️ Directorio del frontend no encontrado en:', frontendDir);
+}
+
 // Configurar rutas de la API
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRoutes);
@@ -271,8 +289,17 @@ app.use('/api/accounting', accountingRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/treatments', doctorRoutes); // Tratamientos usan el mismo controlador
 
-// Manejo de rutas no encontradas
-app.use('*', (req, res) => {
+// Manejo de rutas no encontradas - SPA Routing
+app.use('*', (req, res, next) => {
+    // Solo manejar rutas que no sean API
+    if (!req.originalUrl.startsWith('/api/')) {
+        // Si existe el frontend, servir el index.html para SPA
+        if (fs.existsSync(frontendDir)) {
+            return res.sendFile(path.join(frontendDir, 'index.html'));
+        }
+    }
+    
+    // Para rutas API no encontradas
     res.status(404).json({
         success: false,
         error: 'Endpoint no encontrado',

@@ -1,0 +1,54 @@
+# Configuración Render.com - Clínica Dental Rubio García
+# Deployment completo con frontend y backend integrados
+
+name: clinica-dental-rubio-garcia
+type: web
+
+# Configuración del servicio
+service:
+  type: web
+  name: clinica-dental-app
+  env: node
+  plan: free
+  region: frankfurt
+  buildCommand: npm run build
+  startCommand: npm start
+  
+  # Variables de entorno
+  envVars:
+    - key: NODE_ENV
+      value: production
+    - key: PORT
+      value: 3000
+    - key: JWT_SECRET
+      value: b79882e078a7911286b880690c51934c95174aacaa2fd718d9e71a0cb31cb27368884f152a567a1953de2cdbc977b783c17374a4977dae95653eccb86ec83812
+    - key: WHATSAPP_SESSION_NAME
+      value: rubio_garcia_dental
+    - key: CLINIC_NAME
+      value: Clínica Dental Rubio García
+    - key: CLINIC_ADDRESS
+      value: Calle Ejemplo 123, Madrid, España
+    - key: CLINIC_PHONE
+      value: +34 123 456 789
+    - key: CLINIC_EMAIL
+      value: info@rubiogarciadental.com
+    - key: VITE_API_URL
+      value: /api
+  
+  # Configuración de health check
+  healthCheckPath: /api/system/health
+  healthCheckTimeout: 300
+  
+  # Timeout para build
+  buildCommandTimeout: 900
+
+# Configuración de dominio personalizado
+domains:
+  - www.app.rubiogarciadental.com
+  - app.rubiogarciadental.com
+
+# Base de datos (opcional para desarrollo)
+# databases:
+#   - name: postgres
+#     type: service
+#     plan: free

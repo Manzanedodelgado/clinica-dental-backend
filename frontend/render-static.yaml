@@ -1,0 +1,16 @@
+{
+  "name": "clinica-dental-frontend",
+  "type": "web",
+  "env": "static",
+  "buildCommand": "npm run build",
+  "staticPublishPath": "./dist",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "buildCommandTimeout": 600,
+  "environment": "node",
+  "engine": "nginx"
+}

@@ -1,7 +1,8 @@
 // Servicio API unificado - Backend real con fallback a mock
 import apiMock from './apiMock';
 
-const API_BASE_URL = 'https://clinica-dental-backend.onrender.com';
+// Usar variable de entorno o fallback para desarrollo
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 class ApiService {
   async request(endpoint, options = {}) {
