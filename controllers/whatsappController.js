@@ -8,11 +8,11 @@
 
 require('dotenv').config();
 const { dbConfig, SQL_QUERIES } = require('../config/database');
-const { makeInMemoryStore } = require('@whiskeysockets/baileys');
 const baileys = require('@whiskeysockets/baileys');
 const {
     WhatsAppWebSc,
     makeWASocket,
+    makeInMemoryStore,
     DisconnectReason,
     useMultiFileAuthState,
     fetchLatestBaileysVersion,
