@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "build": "cd ../frontend && npm install && npm run build && cp -r dist/* ./dist/",
+    "build:frontend": "cd ../frontend && npm install && npm run build",
     "test": "jest",
     "test:unit": "jest tests/unit",
     "test:integration": "jest tests/integration",
