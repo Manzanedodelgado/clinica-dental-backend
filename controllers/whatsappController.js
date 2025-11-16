@@ -10,19 +10,11 @@ require('dotenv').config();
 const { dbConfig, SQL_QUERIES } = require('../config/database');
 const baileys = require('@whiskeysockets/baileys');
 const {
-    WhatsAppWebSc,
     makeWASocket,
     makeInMemoryStore,
     DisconnectReason,
     useMultiFileAuthState,
-    fetchLatestBaileysVersion,
-    generateForwardMessageContent,
-    prepareWAMessageMedia,
-    generateWAMessage,
-    generateWAMessageFromContent,
-    downloadMediaMessage,
-    jidDecode,
-    encodeURIComponentStripped
+    fetchLatestBaileysVersion
 } = baileys;
 const qrcode = require('qrcode-terminal');
 const fs = require('fs-extra');
