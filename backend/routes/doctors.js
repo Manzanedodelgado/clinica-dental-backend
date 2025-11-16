@@ -19,7 +19,7 @@ const router = express.Router();
  * @desc    Obtener lista de doctores
  * @access  Private
  */
-router.get('/', AuthMiddleware.authenticate, [
+router.get('/', AuthMiddleware.authenticateToken, [
     query('active').optional().isBoolean(),
     query('specialty').optional().isLength({ min: 1 }),
     query('search').optional().isLength({ min: 1 })
@@ -30,7 +30,7 @@ router.get('/', AuthMiddleware.authenticate, [
  * @desc    Obtener doctor específico
  * @access  Private
  */
-router.get('/:id', AuthMiddleware.authenticate, [
+router.get('/:id', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de doctor inválido')
 ], doctorController.getDoctor);
 
@@ -39,7 +39,7 @@ router.get('/:id', AuthMiddleware.authenticate, [
  * @desc    Obtener horarios del doctor
  * @access  Private
  */
-router.get('/:id/schedule', AuthMiddleware.authenticate, [
+router.get('/:id/schedule', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de doctor inválido'),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601()
@@ -50,7 +50,7 @@ router.get('/:id/schedule', AuthMiddleware.authenticate, [
  * @desc    Obtener citas del doctor
  * @access  Private
  */
-router.get('/:id/appointments', AuthMiddleware.authenticate, [
+router.get('/:id/appointments', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de doctor inválido'),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -64,7 +64,7 @@ router.get('/:id/appointments', AuthMiddleware.authenticate, [
  * @desc    Obtener estadísticas del doctor
  * @access  Private
  */
-router.get('/:id/statistics', AuthMiddleware.authenticate, [
+router.get('/:id/statistics', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de doctor inválido'),
     query('period').optional().isIn(['today', 'week', 'month', 'quarter', 'year', 'custom']),
     query('startDate').optional().isISO8601(),
@@ -76,7 +76,7 @@ router.get('/:id/statistics', AuthMiddleware.authenticate, [
  * @desc    Obtener rendimiento del doctor
  * @access  Private
  */
-router.get('/:id/performance', AuthMiddleware.authenticate, [
+router.get('/:id/performance', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de doctor inválido'),
     query('period').optional().isIn(['month', 'quarter', 'year']),
     query('metrics').optional().isIn(['appointments', 'revenue', 'satisfaction', 'all'])
@@ -89,7 +89,7 @@ router.get('/:id/performance', AuthMiddleware.authenticate, [
  * @desc    Obtener lista de tratamientos
  * @access  Private
  */
-router.get('/', AuthMiddleware.authenticate, [
+router.get('/', AuthMiddleware.authenticateToken, [
     query('active').optional().isBoolean(),
     query('category').optional().isLength({ min: 1 }),
     query('priceRange').optional().isIn(['low', 'medium', 'high']),
@@ -102,7 +102,7 @@ router.get('/', AuthMiddleware.authenticate, [
  * @desc    Obtener tratamiento específico
  * @access  Private
  */
-router.get('/:id', AuthMiddleware.authenticate, [
+router.get('/:id', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de tratamiento inválido')
 ], doctorController.getTreatment);
 
@@ -111,7 +111,7 @@ router.get('/:id', AuthMiddleware.authenticate, [
  * @desc    Ver disponibilidad de tratamientos por fecha
  * @access  Private
  */
-router.get('/:id/availability', AuthMiddleware.authenticate, [
+router.get('/:id/availability', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de tratamiento inválido'),
     query('startDate').isISO8601().withMessage('Fecha de inicio requerida'),
     query('endDate').isISO8601().withMessage('Fecha de fin requerida'),
@@ -123,7 +123,7 @@ router.get('/:id/availability', AuthMiddleware.authenticate, [
  * @desc    Obtener citas de un tratamiento específico
  * @access  Private
  */
-router.get('/:id/appointments', AuthMiddleware.authenticate, [
+router.get('/:id/appointments', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de tratamiento inválido'),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -137,7 +137,7 @@ router.get('/:id/appointments', AuthMiddleware.authenticate, [
  * @desc    Obtener estadísticas de tratamiento
  * @access  Private
  */
-router.get('/:id/statistics', AuthMiddleware.authenticate, [
+router.get('/:id/statistics', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de tratamiento inválido'),
     query('period').optional().isIn(['month', 'quarter', 'year', 'custom']),
     query('startDate').optional().isISO8601(),
@@ -149,14 +149,14 @@ router.get('/:id/statistics', AuthMiddleware.authenticate, [
  * @desc    Obtener categorías de tratamientos
  * @access  Private
  */
-router.get('/categories', AuthMiddleware.authenticate, doctorController.getTreatmentCategories);
+router.get('/categories', AuthMiddleware.authenticateToken, doctorController.getTreatmentCategories);
 
 /**
  * @route   GET /api/treatments/popular
  * @desc    Obtener tratamientos más populares
  * @access  Private
  */
-router.get('/popular', AuthMiddleware.authenticate, [
+router.get('/popular', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['month', 'quarter', 'year']),
     query('limit').optional().isInt({ min: 1, max: 50 })
 ], doctorController.getPopularTreatments);
@@ -166,7 +166,7 @@ router.get('/popular', AuthMiddleware.authenticate, [
  * @desc    Obtener tratamientos recomendados para paciente
  * @access  Private
  */
-router.get('/recommended', AuthMiddleware.authenticate, [
+router.get('/recommended', AuthMiddleware.authenticateToken, [
     query('patientId').isInt({ min: 1 }).withMessage('ID de paciente requerido'),
     query('conditions').optional().isArray(),
     query('age').optional().isInt({ min: 0, max: 150 }),
@@ -180,7 +180,7 @@ router.get('/recommended', AuthMiddleware.authenticate, [
  * @desc    Obtener asignaciones doctor-tratamiento
  * @access  Private
  */
-router.get('/assignments', AuthMiddleware.authenticate, [
+router.get('/assignments', AuthMiddleware.authenticateToken, [
     query('doctorId').optional().isInt({ min: 1 }),
     query('treatmentId').optional().isInt({ min: 1 }),
     query('active').optional().isBoolean()
@@ -191,7 +191,7 @@ router.get('/assignments', AuthMiddleware.authenticate, [
  * @desc    Asignar tratamiento a doctor
  * @access  Private
  */
-router.post('/assignments', AuthMiddleware.authenticate, [
+router.post('/assignments', AuthMiddleware.authenticateToken, [
     body('doctorId').isInt({ min: 1 }).withMessage('ID de doctor requerido'),
     body('treatmentId').isInt({ min: 1 }).withMessage('ID de tratamiento requerido'),
     body('duration').isInt({ min: 15, max: 480 }).withMessage('Duración entre 15 y 480 minutos'),
@@ -207,7 +207,7 @@ router.post('/assignments', AuthMiddleware.authenticate, [
  * @desc    Actualizar asignación doctor-tratamiento
  * @access  Private
  */
-router.put('/assignments/:id', AuthMiddleware.authenticate, [
+router.put('/assignments/:id', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de asignación inválido'),
     body('duration').optional().isInt({ min: 15, max: 480 }),
     body('price').optional().isFloat({ min: 0 }),
@@ -223,7 +223,7 @@ router.put('/assignments/:id', AuthMiddleware.authenticate, [
  * @desc    Eliminar asignación doctor-tratamiento
  * @access  Private
  */
-router.delete('/assignments/:id', AuthMiddleware.authenticate, [
+router.delete('/assignments/:id', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de asignación inválido')
 ], doctorController.deleteAssignment);
 
@@ -234,7 +234,7 @@ router.delete('/assignments/:id', AuthMiddleware.authenticate, [
  * @desc    Verificar disponibilidad de horarios
  * @access  Private
  */
-router.get('/schedule/availability', AuthMiddleware.authenticate, [
+router.get('/schedule/availability', AuthMiddleware.authenticateToken, [
     query('doctorId').isInt({ min: 1 }).withMessage('ID de doctor requerido'),
     query('date').isISO8601().withMessage('Fecha requerida'),
     query('duration').isInt({ min: 15, max: 480 }).withMessage('Duración requerida'),
@@ -246,7 +246,7 @@ router.get('/schedule/availability', AuthMiddleware.authenticate, [
  * @desc    Obtener slots de tiempo disponibles
  * @access  Private
  */
-router.get('/schedule/slots', AuthMiddleware.authenticate, [
+router.get('/schedule/slots', AuthMiddleware.authenticateToken, [
     query('doctorId').isInt({ min: 1 }).withMessage('ID de doctor requerido'),
     query('date').isISO8601().withMessage('Fecha requerida'),
     query('treatmentId').optional().isInt({ min: 1 }),
@@ -258,7 +258,7 @@ router.get('/schedule/slots', AuthMiddleware.authenticate, [
  * @desc    Obtener horarios de trabajo del doctor
  * @access  Private
  */
-router.get('/schedule/working-hours', AuthMiddleware.authenticate, [
+router.get('/schedule/working-hours', AuthMiddleware.authenticateToken, [
     query('doctorId').isInt({ min: 1 }).withMessage('ID de doctor requerido'),
     query('weekStart').optional().isISO8601()
 ], doctorController.getWorkingHours);
@@ -268,7 +268,7 @@ router.get('/schedule/working-hours', AuthMiddleware.authenticate, [
  * @desc    Establecer horarios de trabajo del doctor
  * @access  Private
  */
-router.post('/schedule/working-hours', AuthMiddleware.authenticate, [
+router.post('/schedule/working-hours', AuthMiddleware.authenticateToken, [
     body('doctorId').isInt({ min: 1 }).withMessage('ID de doctor requerido'),
     body('schedule').isArray({ min: 1 }).withMessage('Horario requerido'),
     body('schedule.*.dayOfWeek').isInt({ min: 0, max: 6 }).withMessage('Día de semana inválido'),
@@ -284,7 +284,7 @@ router.post('/schedule/working-hours', AuthMiddleware.authenticate, [
  * @desc    Reporte de utilización de doctores
  * @access  Private
  */
-router.get('/reports/doctor-utilization', AuthMiddleware.authenticate, [
+router.get('/reports/doctor-utilization', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['week', 'month', 'quarter', 'year', 'custom']),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -296,7 +296,7 @@ router.get('/reports/doctor-utilization', AuthMiddleware.authenticate, [
  * @desc    Reporte de popularidad de tratamientos
  * @access  Private
  */
-router.get('/reports/treatment-popularity', AuthMiddleware.authenticate, [
+router.get('/reports/treatment-popularity', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['month', 'quarter', 'year', 'custom']),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -309,7 +309,7 @@ router.get('/reports/treatment-popularity', AuthMiddleware.authenticate, [
  * @desc    Reporte de ingresos por doctor
  * @access  Private
  */
-router.get('/reports/revenue-by-doctor', AuthMiddleware.authenticate, [
+router.get('/reports/revenue-by-doctor', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['month', 'quarter', 'year', 'custom']),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -322,7 +322,7 @@ router.get('/reports/revenue-by-doctor', AuthMiddleware.authenticate, [
  * @desc    Estadísticas generales de doctores y tratamientos
  * @access  Private
  */
-router.get('/statistics/overview', AuthMiddleware.authenticate, [
+router.get('/statistics/overview', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['month', 'quarter', 'year'])
 ], doctorController.getOverviewStatistics);
 
@@ -331,7 +331,7 @@ router.get('/statistics/overview', AuthMiddleware.authenticate, [
  * @desc    Tendencias de tratamientos y doctores
  * @access  Private
  */
-router.get('/statistics/trends', AuthMiddleware.authenticate, [
+router.get('/statistics/trends', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['month', 'quarter', 'year']),
     query('treatmentId').optional().isInt({ min: 1 }),
     query('doctorId').optional().isInt({ min: 1 }),
@@ -345,14 +345,14 @@ router.get('/statistics/trends', AuthMiddleware.authenticate, [
  * @desc    Obtener configuración de doctores y tratamientos
  * @access  Private
  */
-router.get('/config/settings', AuthMiddleware.authenticate, doctorController.getConfigSettings);
+router.get('/config/settings', AuthMiddleware.authenticateToken, doctorController.getConfigSettings);
 
 /**
  * @route   PUT /api/config/settings
  * @desc    Actualizar configuración de doctores y tratamientos
  * @access  Private
  */
-router.put('/config/settings', AuthMiddleware.authenticate, [
+router.put('/config/settings', AuthMiddleware.authenticateToken, [
     body('defaultAppointmentDuration').optional().isInt({ min: 15, max: 480 }),
     body('advanceBookingLimit').optional().isInt({ min: 1, max: 365 }),
     body('workingDays').optional().isArray(),
@@ -369,14 +369,14 @@ router.put('/config/settings', AuthMiddleware.authenticate, [
  * @desc    Obtener plantillas de horarios
  * @access  Private
  */
-router.get('/config/templates', AuthMiddleware.authenticate, doctorController.getScheduleTemplates);
+router.get('/config/templates', AuthMiddleware.authenticateToken, doctorController.getScheduleTemplates);
 
 /**
  * @route   POST /api/config/templates
  * @desc    Crear plantilla de horario
  * @access  Private
  */
-router.post('/config/templates', AuthMiddleware.authenticate, [
+router.post('/config/templates', AuthMiddleware.authenticateToken, [
     body('name').isLength({ min: 1, max: 100 }).withMessage('Nombre requerido'),
     body('schedule').isArray({ min: 1 }).withMessage('Horario requerido'),
     body('description').optional().isLength({ max: 500 }),
@@ -390,7 +390,7 @@ router.post('/config/templates', AuthMiddleware.authenticate, [
  * @desc    Actividad reciente de doctores y tratamientos
  * @access  Private
  */
-router.get('/activity', AuthMiddleware.authenticate, [
+router.get('/activity', AuthMiddleware.authenticateToken, [
     query('limit').optional().isInt({ min: 1, max: 100 }),
     query('type').optional().isIn(['appointment', 'assignment', 'schedule', 'treatment']),
     query('doctorId').optional().isInt({ min: 1 }),
@@ -404,7 +404,7 @@ router.get('/activity', AuthMiddleware.authenticate, [
  * @desc    Exportar datos de doctores
  * @access  Private
  */
-router.get('/export/doctors', AuthMiddleware.authenticate, [
+router.get('/export/doctors', AuthMiddleware.authenticateToken, [
     query('format').optional().isIn(['csv', 'excel', 'pdf']),
     query('includeSchedule').optional().isBoolean(),
     query('includeStatistics').optional().isBoolean()
@@ -415,7 +415,7 @@ router.get('/export/doctors', AuthMiddleware.authenticate, [
  * @desc    Exportar datos de tratamientos
  * @access  Private
  */
-router.get('/export/treatments', AuthMiddleware.authenticate, [
+router.get('/export/treatments', AuthMiddleware.authenticateToken, [
     query('format').optional().isIn(['csv', 'excel', 'pdf']),
     query('category').optional().isLength({ min: 1 }),
     query('includePricing').optional().isBoolean(),
@@ -427,7 +427,7 @@ router.get('/export/treatments', AuthMiddleware.authenticate, [
  * @desc    Exportar asignaciones doctor-tratamiento
  * @access  Private
  */
-router.get('/export/assignments', AuthMiddleware.authenticate, [
+router.get('/export/assignments', AuthMiddleware.authenticateToken, [
     query('format').optional().isIn(['csv', 'excel', 'pdf']),
     query('doctorId').optional().isInt({ min: 1 }),
     query('active').optional().isBoolean()

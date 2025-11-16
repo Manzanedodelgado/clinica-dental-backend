@@ -19,7 +19,7 @@ const router = express.Router();
  * @desc    Obtener todas las facturas con filtros
  * @access  Private
  */
-router.get('/', AuthMiddleware.authenticate, [
+router.get('/', AuthMiddleware.authenticateToken, [
     query('page').optional().isInt({ min: 1 }),
     query('limit').optional().isInt({ min: 1, max: 100 }),
     query('status').optional().isIn(['pending', 'sent', 'paid', 'cancelled', 'overdue']),
@@ -36,7 +36,7 @@ router.get('/', AuthMiddleware.authenticate, [
  * @desc    Crear nueva factura
  * @access  Private
  */
-router.post('/', AuthMiddleware.authenticate, [
+router.post('/', AuthMiddleware.authenticateToken, [
     body('patientId').isInt({ min: 1 }).withMessage('ID de paciente requerido'),
     body('appointmentId').optional().isInt({ min: 1 }),
     body('items').isArray({ min: 1 }).withMessage('Al menos un item requerido'),
@@ -53,7 +53,7 @@ router.post('/', AuthMiddleware.authenticate, [
  * @desc    Obtener factura específica
  * @access  Private
  */
-router.get('/:id', AuthMiddleware.authenticate, [
+router.get('/:id', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de factura inválido')
 ], invoiceController.getInvoice);
 
@@ -62,7 +62,7 @@ router.get('/:id', AuthMiddleware.authenticate, [
  * @desc    Actualizar factura
  * @access  Private
  */
-router.put('/:id', AuthMiddleware.authenticate, [
+router.put('/:id', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de factura inválido'),
     body('status').optional().isIn(['pending', 'sent', 'paid', 'cancelled']),
     body('paymentStatus').optional().isIn(['pending', 'paid', 'overdue', 'partial']),
@@ -76,7 +76,7 @@ router.put('/:id', AuthMiddleware.authenticate, [
  * @desc    Anular factura (soft delete)
  * @access  Private
  */
-router.delete('/:id', AuthMiddleware.authenticate, [
+router.delete('/:id', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de factura inválido'),
     body('reason').isLength({ min: 1, max: 200 }).withMessage('Motivo de anulación requerido')
 ], invoiceController.cancelInvoice);
@@ -88,7 +88,7 @@ router.delete('/:id', AuthMiddleware.authenticate, [
  * @desc    Enviar factura por email
  * @access  Private
  */
-router.post('/:id/send', AuthMiddleware.authenticate, [
+router.post('/:id/send', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de factura inválido'),
     body('email').isEmail().withMessage('Email válido requerido'),
     body('customMessage').optional().isLength({ max: 500 }),
@@ -100,7 +100,7 @@ router.post('/:id/send', AuthMiddleware.authenticate, [
  * @desc    Generar y descargar PDF de factura
  * @access  Private
  */
-router.get('/:id/pdf', AuthMiddleware.authenticate, [
+router.get('/:id/pdf', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de factura inválido')
 ], invoiceController.generatePDF);
 
@@ -109,7 +109,7 @@ router.get('/:id/pdf', AuthMiddleware.authenticate, [
  * @desc    Enviar factura a Verifactu (Agencia Tributaria)
  * @access  Private
  */
-router.post('/:id/verifactu', AuthMiddleware.authenticate, [
+router.post('/:id/verifactu', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de factura inválido')
 ], invoiceController.submitToVerifactu);
 
@@ -118,7 +118,7 @@ router.post('/:id/verifactu', AuthMiddleware.authenticate, [
  * @desc    Obtener estado de envío a Verifactu
  * @access  Private
  */
-router.get('/:id/verifactu/status', AuthMiddleware.authenticate, [
+router.get('/:id/verifactu/status', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de factura inválido')
 ], invoiceController.getVerifactuStatus);
 
@@ -127,7 +127,7 @@ router.get('/:id/verifactu/status', AuthMiddleware.authenticate, [
  * @desc    Registrar pago de factura
  * @access  Private
  */
-router.post('/:id/payment', AuthMiddleware.authenticate, [
+router.post('/:id/payment', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de factura inválido'),
     body('amount').isFloat({ min: 0.01 }).withMessage('Importe debe ser mayor a 0'),
     body('paymentMethod').isIn(['cash', 'card', 'transfer', 'check']).withMessage('Método de pago inválido'),
@@ -143,14 +143,14 @@ router.post('/:id/payment', AuthMiddleware.authenticate, [
  * @desc    Obtener plantillas de facturas
  * @access  Private
  */
-router.get('/templates', AuthMiddleware.authenticate, invoiceController.getTemplates);
+router.get('/templates', AuthMiddleware.authenticateToken, invoiceController.getTemplates);
 
 /**
  * @route   POST /api/invoices/templates
  * @desc    Crear nueva plantilla de factura
  * @access  Private
  */
-router.post('/templates', AuthMiddleware.authenticate, [
+router.post('/templates', AuthMiddleware.authenticateToken, [
     body('name').isLength({ min: 1, max: 100 }).withMessage('Nombre requerido'),
     body('header').optional().isLength({ max: 1000 }),
     body('footer').optional().isLength({ max: 1000 }),
@@ -165,7 +165,7 @@ router.post('/templates', AuthMiddleware.authenticate, [
  * @desc    Resumen de facturación por periodo
  * @access  Private
  */
-router.get('/reports/summary', AuthMiddleware.authenticate, [
+router.get('/reports/summary', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['today', 'week', 'month', 'quarter', 'year', 'custom']),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -177,7 +177,7 @@ router.get('/reports/summary', AuthMiddleware.authenticate, [
  * @desc    Facturas pendientes de cobro
  * @access  Private
  */
-router.get('/reports/outstanding', AuthMiddleware.authenticate, [
+router.get('/reports/outstanding', AuthMiddleware.authenticateToken, [
     query('daysOverdue').optional().isInt({ min: 0 }),
     query('minAmount').optional().isFloat({ min: 0 }),
     query('maxAmount').optional().isFloat({ min: 0 })
@@ -188,7 +188,7 @@ router.get('/reports/outstanding', AuthMiddleware.authenticate, [
  * @desc    Estadísticas de facturación
  * @access  Private
  */
-router.get('/statistics', AuthMiddleware.authenticate, [
+router.get('/statistics', AuthMiddleware.authenticateToken, [
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601()
 ], invoiceController.getStatistics);
@@ -198,7 +198,7 @@ router.get('/statistics', AuthMiddleware.authenticate, [
  * @desc    Actividad reciente de facturas
  * @access  Private
  */
-router.get('/activity', AuthMiddleware.authenticate, [
+router.get('/activity', AuthMiddleware.authenticateToken, [
     query('limit').optional().isInt({ min: 1, max: 100 }),
     query('type').optional().isIn(['created', 'sent', 'paid', 'cancelled', 'overdue'])
 ], invoiceController.getActivity);
@@ -210,7 +210,7 @@ router.get('/activity', AuthMiddleware.authenticate, [
  * @desc    Búsqueda avanzada de facturas
  * @access  Private
  */
-router.get('/search/advanced', AuthMiddleware.authenticate, [
+router.get('/search/advanced', AuthMiddleware.authenticateToken, [
     query('query').optional().isLength({ min: 1 }),
     query('patientName').optional().isLength({ min: 1 }),
     query('amountMin').optional().isFloat({ min: 0 }),
@@ -233,7 +233,7 @@ router.get('/search/advanced', AuthMiddleware.authenticate, [
  * @desc    Exportar facturas a Excel
  * @access  Private
  */
-router.get('/export/excel', AuthMiddleware.authenticate, [
+router.get('/export/excel', AuthMiddleware.authenticateToken, [
     query('format').optional().isIn(['xlsx', 'csv']),
     query('status').optional().isIn(['pending', 'sent', 'paid', 'cancelled', 'overdue']),
     query('startDate').optional().isISO8601(),
@@ -246,7 +246,7 @@ router.get('/export/excel', AuthMiddleware.authenticate, [
  * @desc    Exportar facturas a PDF (reporte)
  * @access  Private
  */
-router.get('/export/pdf', AuthMiddleware.authenticate, [
+router.get('/export/pdf', AuthMiddleware.authenticateToken, [
     query('status').optional().isIn(['pending', 'sent', 'paid', 'cancelled', 'overdue']),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -260,14 +260,14 @@ router.get('/export/pdf', AuthMiddleware.authenticate, [
  * @desc    Obtener configuración de facturación
  * @access  Private
  */
-router.get('/config', AuthMiddleware.authenticate, invoiceController.getConfig);
+router.get('/config', AuthMiddleware.authenticateToken, invoiceController.getConfig);
 
 /**
  * @route   PUT /api/invoices/config
  * @desc    Actualizar configuración de facturación
  * @access  Private
  */
-router.put('/config', AuthMiddleware.authenticate, [
+router.put('/config', AuthMiddleware.authenticateToken, [
     body('defaultTaxRate').optional().isFloat({ min: 0, max: 100 }),
     body('invoicePrefix').optional().isLength({ min: 1, max: 10 }),
     body('nextInvoiceNumber').optional().isInt({ min: 1 }),
@@ -284,7 +284,7 @@ router.put('/config', AuthMiddleware.authenticate, [
  * @desc    Crear factura recurrente
  * @access  Private
  */
-router.post('/recurring', AuthMiddleware.authenticate, [
+router.post('/recurring', AuthMiddleware.authenticateToken, [
     body('patientId').isInt({ min: 1 }).withMessage('ID de paciente requerido'),
     body('templateId').isInt({ min: 1 }).withMessage('ID de plantilla requerido'),
     body('frequency').isIn(['weekly', 'monthly', 'quarterly', 'yearly']).withMessage('Frecuencia inválida'),
@@ -299,7 +299,7 @@ router.post('/recurring', AuthMiddleware.authenticate, [
  * @desc    Obtener facturas recurrentes
  * @access  Private
  */
-router.get('/recurring', AuthMiddleware.authenticate, [
+router.get('/recurring', AuthMiddleware.authenticateToken, [
     query('active').optional().isBoolean(),
     query('patientId').optional().isInt({ min: 1 })
 ], invoiceController.getRecurringInvoices);
@@ -309,7 +309,7 @@ router.get('/recurring', AuthMiddleware.authenticate, [
  * @desc    Actualizar factura recurrente
  * @access  Private
  */
-router.put('/recurring/:id', AuthMiddleware.authenticate, [
+router.put('/recurring/:id', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de factura recurrente inválido'),
     body('frequency').optional().isIn(['weekly', 'monthly', 'quarterly', 'yearly']),
     body('nextInvoiceDate').optional().isISO8601(),
@@ -322,7 +322,7 @@ router.put('/recurring/:id', AuthMiddleware.authenticate, [
  * @desc    Cancelar factura recurrente
  * @access  Private
  */
-router.delete('/recurring/:id', AuthMiddleware.authenticate, [
+router.delete('/recurring/:id', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de factura recurrente inválido')
 ], invoiceController.cancelRecurringInvoice);
 

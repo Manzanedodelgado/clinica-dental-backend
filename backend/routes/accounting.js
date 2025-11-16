@@ -19,7 +19,7 @@ const router = express.Router();
  * @desc    Resumen financiero general
  * @access  Private
  */
-router.get('/summary', AuthMiddleware.authenticate, [
+router.get('/summary', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['today', 'week', 'month', 'quarter', 'year', 'custom']),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -32,7 +32,7 @@ router.get('/summary', AuthMiddleware.authenticate, [
  * @desc    Reporte de ingresos
  * @access  Private
  */
-router.get('/income', AuthMiddleware.authenticate, [
+router.get('/income', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['today', 'week', 'month', 'quarter', 'year', 'custom']),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -46,7 +46,7 @@ router.get('/income', AuthMiddleware.authenticate, [
  * @desc    Reporte de gastos
  * @access  Private
  */
-router.get('/expenses', AuthMiddleware.authenticate, [
+router.get('/expenses', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['today', 'week', 'month', 'quarter', 'year', 'custom']),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -60,7 +60,7 @@ router.get('/expenses', AuthMiddleware.authenticate, [
  * @desc    Estado de resultados (P&L)
  * @access  Private
  */
-router.get('/profit-loss', AuthMiddleware.authenticate, [
+router.get('/profit-loss', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['month', 'quarter', 'year', 'custom']),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -73,7 +73,7 @@ router.get('/profit-loss', AuthMiddleware.authenticate, [
  * @desc    Flujo de caja
  * @access  Private
  */
-router.get('/cash-flow', AuthMiddleware.authenticate, [
+router.get('/cash-flow', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['month', 'quarter', 'year']),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -87,7 +87,7 @@ router.get('/cash-flow', AuthMiddleware.authenticate, [
  * @desc    Obtener todos los gastos con filtros
  * @access  Private
  */
-router.get('/expenses/all', AuthMiddleware.authenticate, [
+router.get('/expenses/all', AuthMiddleware.authenticateToken, [
     query('page').optional().isInt({ min: 1 }),
     query('limit').optional().isInt({ min: 1, max: 100 }),
     query('search').optional().isLength({ min: 1 }),
@@ -106,7 +106,7 @@ router.get('/expenses/all', AuthMiddleware.authenticate, [
  * @desc    Crear nuevo gasto
  * @access  Private
  */
-router.post('/expense', AuthMiddleware.authenticate, [
+router.post('/expense', AuthMiddleware.authenticateToken, [
     body('description').isLength({ min: 1, max: 255 }).withMessage('Descripción requerida'),
     body('amount').isFloat({ min: 0.01 }).withMessage('Importe debe ser mayor a 0'),
     body('category').isIn(['supplies', 'equipment', 'utilities', 'salaries', 'marketing', 'other']).withMessage('Categoría inválida'),
@@ -123,7 +123,7 @@ router.post('/expense', AuthMiddleware.authenticate, [
  * @desc    Actualizar gasto
  * @access  Private
  */
-router.put('/expense/:id', AuthMiddleware.authenticate, [
+router.put('/expense/:id', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de gasto inválido'),
     body('description').optional().isLength({ min: 1, max: 255 }),
     body('amount').optional().isFloat({ min: 0.01 }),
@@ -141,7 +141,7 @@ router.put('/expense/:id', AuthMiddleware.authenticate, [
  * @desc    Eliminar gasto (soft delete)
  * @access  Private
  */
-router.delete('/expense/:id', AuthMiddleware.authenticate, [
+router.delete('/expense/:id', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de gasto inválido'),
     body('reason').optional().isLength({ max: 200 })
 ], accountingController.deleteExpense);
@@ -151,7 +151,7 @@ router.delete('/expense/:id', AuthMiddleware.authenticate, [
  * @desc    Aprobar gasto
  * @access  Private
  */
-router.post('/expense/:id/approve', AuthMiddleware.authenticate, [
+router.post('/expense/:id/approve', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de gasto inválido'),
     body('approvalNotes').optional().isLength({ max: 500 }),
     body('approvedAmount').optional().isFloat({ min: 0 })
@@ -162,7 +162,7 @@ router.post('/expense/:id/approve', AuthMiddleware.authenticate, [
  * @desc    Rechazar gasto
  * @access  Private
  */
-router.post('/expense/:id/reject', AuthMiddleware.authenticate, [
+router.post('/expense/:id/reject', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de gasto inválido'),
     body('rejectionReason').isLength({ min: 1, max: 200 }).withMessage('Motivo de rechazo requerido')
 ], accountingController.rejectExpense);
@@ -174,7 +174,7 @@ router.post('/expense/:id/reject', AuthMiddleware.authenticate, [
  * @desc    Obtener historial de pagos
  * @access  Private
  */
-router.get('/payments', AuthMiddleware.authenticate, [
+router.get('/payments', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['today', 'week', 'month', 'quarter', 'year', 'custom']),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -189,7 +189,7 @@ router.get('/payments', AuthMiddleware.authenticate, [
  * @desc    Registrar pago directo
  * @access  Private
  */
-router.post('/payment', AuthMiddleware.authenticate, [
+router.post('/payment', AuthMiddleware.authenticateToken, [
     body('invoiceId').optional().isInt({ min: 1 }),
     body('patientId').optional().isInt({ min: 1 }),
     body('amount').isFloat({ min: 0.01 }).withMessage('Importe debe ser mayor a 0'),
@@ -204,7 +204,7 @@ router.post('/payment', AuthMiddleware.authenticate, [
  * @desc    Cuentas por cobrar y pagar
  * @access  Private
  */
-router.get('/outstanding', AuthMiddleware.authenticate, [
+router.get('/outstanding', AuthMiddleware.authenticateToken, [
     query('type').optional().isIn(['receivables', 'payables', 'both']),
     query('daysOverdue').optional().isInt({ min: 0 }),
     query('minAmount').optional().isFloat({ min: 0 })
@@ -217,7 +217,7 @@ router.get('/outstanding', AuthMiddleware.authenticate, [
  * @desc    Dashboard financiero principal
  * @access  Private
  */
-router.get('/reports/dashboard', AuthMiddleware.authenticate, [
+router.get('/reports/dashboard', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['today', 'week', 'month', 'quarter', 'year'])
 ], accountingController.getDashboard);
 
@@ -226,7 +226,7 @@ router.get('/reports/dashboard', AuthMiddleware.authenticate, [
  * @desc    Reporte comparativo entre periodos
  * @access  Private
  */
-router.get('/reports/comparative', AuthMiddleware.authenticate, [
+router.get('/reports/comparative', AuthMiddleware.authenticateToken, [
     query('currentPeriod').isIn(['month', 'quarter', 'year']).withMessage('Periodo actual requerido'),
     query('previousPeriod').optional().isInt({ min: 1, max: 12 }),
     query('includeExpenses').optional().isBoolean(),
@@ -238,7 +238,7 @@ router.get('/reports/comparative', AuthMiddleware.authenticate, [
  * @desc    Reporte fiscal para Hacienda
  * @access  Private
  */
-router.get('/reports/tax', AuthMiddleware.authenticate, [
+router.get('/reports/tax', AuthMiddleware.authenticateToken, [
     query('year').optional().isInt({ min: 2020, max: 2030 }),
     query('quarter').optional().isInt({ min: 1, max: 4 }),
     query('month').optional().isInt({ min: 1, max: 12 }),
@@ -250,7 +250,7 @@ router.get('/reports/tax', AuthMiddleware.authenticate, [
  * @desc    Análisis financiero avanzado
  * @access  Private
  */
-router.get('/analytics', AuthMiddleware.authenticate, [
+router.get('/analytics', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['month', 'quarter', 'year']),
     query('metrics').optional().isIn(['profitability', 'cashflow', 'efficiency', 'growth']),
     query('comparison').optional().isBoolean()
@@ -263,7 +263,7 @@ router.get('/analytics', AuthMiddleware.authenticate, [
  * @desc    Estadísticas financieras generales
  * @access  Private
  */
-router.get('/statistics', AuthMiddleware.authenticate, [
+router.get('/statistics', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['today', 'week', 'month', 'quarter', 'year', 'all']),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601()
@@ -274,7 +274,7 @@ router.get('/statistics', AuthMiddleware.authenticate, [
  * @desc    Indicadores de rendimiento (KPIs)
  * @access  Private
  */
-router.get('/performance', AuthMiddleware.authenticate, [
+router.get('/performance', AuthMiddleware.authenticateToken, [
     query('period').optional().isIn(['month', 'quarter', 'year']),
     query('doctorId').optional().isInt({ min: 1 }),
     query('treatmentId').optional().isInt({ min: 1 })
@@ -285,7 +285,7 @@ router.get('/performance', AuthMiddleware.authenticate, [
  * @desc    Proyecciones financieras
  * @access  Private
  */
-router.get('/forecasts', AuthMiddleware.authenticate, [
+router.get('/forecasts', AuthMiddleware.authenticateToken, [
     query('months').optional().isInt({ min: 1, max: 24 }),
     query('type').optional().isIn(['revenue', 'expenses', 'profit', 'cashflow']),
     query('scenario').optional().isIn(['conservative', 'moderate', 'optimistic'])
@@ -298,14 +298,14 @@ router.get('/forecasts', AuthMiddleware.authenticate, [
  * @desc    Obtener configuración contable
  * @access  Private
  */
-router.get('/config', AuthMiddleware.authenticate, accountingController.getConfig);
+router.get('/config', AuthMiddleware.authenticateToken, accountingController.getConfig);
 
 /**
  * @route   PUT /api/accounting/config
  * @desc    Actualizar configuración contable
  * @access  Private
  */
-router.put('/config', AuthMiddleware.authenticate, [
+router.put('/config', AuthMiddleware.authenticateToken, [
     body('fiscalYearStart').optional().isInt({ min: 1, max: 12 }),
     body('taxRate').optional().isFloat({ min: 0, max: 100 }),
     body('currency').optional().isLength({ min: 3, max: 3 }),
@@ -321,7 +321,7 @@ router.put('/config', AuthMiddleware.authenticate, [
  * @desc    Exportar datos contables a Excel
  * @access  Private
  */
-router.get('/export/excel', AuthMiddleware.authenticate, [
+router.get('/export/excel', AuthMiddleware.authenticateToken, [
     query('type').isIn(['summary', 'income', 'expenses', 'profit-loss']).withMessage('Tipo de exportación requerido'),
     query('period').optional().isIn(['today', 'week', 'month', 'quarter', 'year', 'custom']),
     query('startDate').optional().isISO8601(),
@@ -335,7 +335,7 @@ router.get('/export/excel', AuthMiddleware.authenticate, [
  * @desc    Exportar reportes a PDF
  * @access  Private
  */
-router.get('/export/pdf', AuthMiddleware.authenticate, [
+router.get('/export/pdf', AuthMiddleware.authenticateToken, [
     query('reportType').isIn(['summary', 'income', 'expenses', 'profit-loss', 'tax', 'dashboard']).withMessage('Tipo de reporte requerido'),
     query('period').optional().isIn(['today', 'week', 'month', 'quarter', 'year', 'custom']),
     query('startDate').optional().isISO8601(),
@@ -349,7 +349,7 @@ router.get('/export/pdf', AuthMiddleware.authenticate, [
  * @desc    Exportar datos a CSV
  * @access  Private
  */
-router.get('/export/csv', AuthMiddleware.authenticate, [
+router.get('/export/csv', AuthMiddleware.authenticateToken, [
     query('type').isIn(['invoices', 'payments', 'expenses', 'all']).withMessage('Tipo de exportación requerido'),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -364,7 +364,7 @@ router.get('/export/csv', AuthMiddleware.authenticate, [
  * @desc    Obtener presupuestos
  * @access  Private
  */
-router.get('/budgets', AuthMiddleware.authenticate, [
+router.get('/budgets', AuthMiddleware.authenticateToken, [
     query('year').optional().isInt({ min: 2020, max: 2030 }),
     query('type').optional().isIn(['annual', 'quarterly', 'monthly']),
     query('status').optional().isIn(['draft', 'approved', 'active', 'closed'])
@@ -375,7 +375,7 @@ router.get('/budgets', AuthMiddleware.authenticate, [
  * @desc    Crear nuevo presupuesto
  * @access  Private
  */
-router.post('/budget', AuthMiddleware.authenticate, [
+router.post('/budget', AuthMiddleware.authenticateToken, [
     body('name').isLength({ min: 1, max: 100 }).withMessage('Nombre requerido'),
     body('year').isInt({ min: 2020, max: 2030 }).withMessage('Año válido requerido'),
     body('type').isIn(['annual', 'quarterly', 'monthly']).withMessage('Tipo de presupuesto inválido'),
@@ -390,7 +390,7 @@ router.post('/budget', AuthMiddleware.authenticate, [
  * @desc    Actualizar presupuesto
  * @access  Private
  */
-router.put('/budget/:id', AuthMiddleware.authenticate, [
+router.put('/budget/:id', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de presupuesto inválido'),
     body('name').optional().isLength({ min: 1, max: 100 }),
     body('status').optional().isIn(['draft', 'approved', 'active', 'closed']),
@@ -402,7 +402,7 @@ router.put('/budget/:id', AuthMiddleware.authenticate, [
  * @desc    Análisis de variaciones del presupuesto
  * @access  Private
  */
-router.get('/budget/:id/variance', AuthMiddleware.authenticate, [
+router.get('/budget/:id/variance', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de presupuesto inválido'),
     query('period').optional().isIn(['month', 'quarter', 'year']),
     query('startDate').optional().isISO8601(),
@@ -414,7 +414,7 @@ router.get('/budget/:id/variance', AuthMiddleware.authenticate, [
  * @desc    Actividad reciente contable
  * @access  Private
  */
-router.get('/activity', AuthMiddleware.authenticate, [
+router.get('/activity', AuthMiddleware.authenticateToken, [
     query('limit').optional().isInt({ min: 1, max: 100 }),
     query('type').optional().isIn(['payment', 'expense', 'invoice', 'budget', 'report'])
 ], accountingController.getActivity);
@@ -426,7 +426,7 @@ router.get('/activity', AuthMiddleware.authenticate, [
  * @desc    Conciliación bancaria
  * @access  Private
  */
-router.get('/reconciliation', AuthMiddleware.authenticate, [
+router.get('/reconciliation', AuthMiddleware.authenticateToken, [
     query('accountId').optional().isInt({ min: 1 }),
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
@@ -438,7 +438,7 @@ router.get('/reconciliation', AuthMiddleware.authenticate, [
  * @desc    Crear nueva conciliación
  * @access  Private
  */
-router.post('/reconciliation', AuthMiddleware.authenticate, [
+router.post('/reconciliation', AuthMiddleware.authenticateToken, [
     body('accountId').isInt({ min: 1 }).withMessage('ID de cuenta requerido'),
     body('statementDate').isISO8601().withMessage('Fecha de estado de cuenta válida requerida'),
     body('statementBalance').isFloat().withMessage('Balance del estado de cuenta requerido'),
@@ -450,7 +450,7 @@ router.post('/reconciliation', AuthMiddleware.authenticate, [
  * @desc    Marcar transacción como conciliada
  * @access  Private
  */
-router.put('/reconciliation/:id/mark', AuthMiddleware.authenticate, [
+router.put('/reconciliation/:id/mark', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de conciliación inválido'),
     body('transactionId').isInt({ min: 1 }).withMessage('ID de transacción requerido'),
     body('status').isIn(['matched', 'unmatched', 'disputed']).withMessage('Estado inválido'),
