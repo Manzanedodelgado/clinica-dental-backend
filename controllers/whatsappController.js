@@ -11,11 +11,11 @@ const { dbConfig, SQL_QUERIES } = require('../config/database');
 const baileys = require('@whiskeysockets/baileys');
 const {
     makeWASocket,
-    makeInMemoryStore,
     DisconnectReason,
     useMultiFileAuthState,
     fetchLatestBaileysVersion
 } = baileys;
+const makeInMemoryStore = baileys.makeInMemoryStore;
 const qrcode = require('qrcode-terminal');
 const fs = require('fs-extra');
 const path = require('path');
