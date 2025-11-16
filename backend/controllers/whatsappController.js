@@ -21,11 +21,9 @@ const {
     generateWAMessageFromContent,
     downloadMediaMessage,
     jidDecode,
-    encodeURIComponentStripped
+    encodeURIComponentStripped,
+    makeInMemoryStore
 } = baileys;
-
-// Importar makeInMemoryStore desde la nueva estructura
-const makeInMemoryStore = baileys.makeInMemoryStore;
 const qrcode = require('qrcode-terminal');
 const fs = require('fs-extra');
 const path = require('path');
