@@ -19,7 +19,7 @@ const router = express.Router();
  * @desc    Obtener lista de conversaciones WhatsApp
  * @access  Private
  */
-router.get('/conversations', AuthMiddleware.authenticate, [
+router.get('/conversations', AuthMiddleware.authenticateToken, [
     query('page').optional().isInt({ min: 1 }),
     query('limit').optional().isInt({ min: 1, max: 100 }),
     query('status').optional().isIn(['active', 'archived', 'blocked']),
@@ -31,7 +31,7 @@ router.get('/conversations', AuthMiddleware.authenticate, [
  * @desc    Iniciar nueva conversación
  * @access  Private
  */
-router.post('/conversations', AuthMiddleware.authenticate, [
+router.post('/conversations', AuthMiddleware.authenticateToken, [
     body('patientId').isInt({ min: 1 }).withMessage('ID de paciente requerido'),
     body('message').isLength({ min: 1, max: 1000 }).withMessage('Mensaje requerido'),
     body('appointmentId').optional().isInt({ min: 1 })
@@ -42,7 +42,7 @@ router.post('/conversations', AuthMiddleware.authenticate, [
  * @desc    Obtener conversación específica
  * @access  Private
  */
-router.get('/conversations/:id', AuthMiddleware.authenticate, [
+router.get('/conversations/:id', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de conversación inválido')
 ], whatsappController.getConversation);
 
@@ -51,7 +51,7 @@ router.get('/conversations/:id', AuthMiddleware.authenticate, [
  * @desc    Obtener mensajes de conversación
  * @access  Private
  */
-router.get('/conversations/:id/messages', AuthMiddleware.authenticate, [
+router.get('/conversations/:id/messages', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de conversación inválido'),
     query('page').optional().isInt({ min: 1 }),
     query('limit').optional().isInt({ min: 1, max: 100 })
@@ -64,7 +64,7 @@ router.get('/conversations/:id/messages', AuthMiddleware.authenticate, [
  * @desc    Enviar mensaje WhatsApp
  * @access  Private
  */
-router.post('/messages', AuthMiddleware.authenticate, [
+router.post('/messages', AuthMiddleware.authenticateToken, [
     body('conversationId').isInt({ min: 1 }).withMessage('ID de conversación requerido'),
     body('text').isLength({ min: 1, max: 1000 }).withMessage('Texto del mensaje requerido'),
     body('type').optional().isIn(['text', 'template', 'interactive']).withMessage('Tipo de mensaje inválido'),
@@ -76,7 +76,7 @@ router.post('/messages', AuthMiddleware.authenticate, [
  * @desc    Obtener mensajes pendientes de procesar (para IA)
  * @access  Private
  */
-router.get('/messages/pending', AuthMiddleware.authenticate, [
+router.get('/messages/pending', AuthMiddleware.authenticateToken, [
     query('limit').optional().isInt({ min: 1, max: 50 }),
     query('appointmentId').optional().isInt({ min: 1 })
 ], whatsappController.getPendingMessages);
@@ -86,7 +86,7 @@ router.get('/messages/pending', AuthMiddleware.authenticate, [
  * @desc    Marcar mensaje como leído
  * @access  Private
  */
-router.post('/messages/:id/read', AuthMiddleware.authenticate, [
+router.post('/messages/:id/read', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de mensaje inválido')
 ], whatsappController.markAsRead);
 
@@ -97,7 +97,7 @@ router.post('/messages/:id/read', AuthMiddleware.authenticate, [
  * @desc    Obtener plantillas de mensajes
  * @access  Private
  */
-router.get('/templates', AuthMiddleware.authenticate, [
+router.get('/templates', AuthMiddleware.authenticateToken, [
     query('type').optional().isIn(['appointment', 'confirmation', 'reminder', 'generic']),
     query('active').optional().isBoolean()
 ], whatsappController.getTemplates);
@@ -107,7 +107,7 @@ router.get('/templates', AuthMiddleware.authenticate, [
  * @desc    Crear nueva plantilla
  * @access  Private
  */
-router.post('/templates', AuthMiddleware.authenticate, [
+router.post('/templates', AuthMiddleware.authenticateToken, [
     body('name').isLength({ min: 1, max: 100 }).withMessage('Nombre requerido'),
     body('content').isLength({ min: 1, max: 1000 }).withMessage('Contenido requerido'),
     body('type').isIn(['appointment', 'confirmation', 'reminder', 'generic']).withMessage('Tipo inválido'),
@@ -121,7 +121,7 @@ router.post('/templates', AuthMiddleware.authenticate, [
  * @desc    Enviar confirmación de cita 24h antes
  * @access  Private
  */
-router.post('/confirmation/send', AuthMiddleware.authenticate, [
+router.post('/confirmation/send', AuthMiddleware.authenticateToken, [
     body('appointmentId').isInt({ min: 1 }).withMessage('ID de cita requerido'),
     body('customMessage').optional().isLength({ max: 500 })
 ], whatsappController.sendAppointmentConfirmation);
@@ -131,7 +131,7 @@ router.post('/confirmation/send', AuthMiddleware.authenticate, [
  * @desc    Procesar respuesta de confirmación del paciente
  * @access  Private
  */
-router.post('/confirmation/process', AuthMiddleware.authenticate, [
+router.post('/confirmation/process', AuthMiddleware.authenticateToken, [
     body('appointmentId').isInt({ min: 1 }).withMessage('ID de cita requerido'),
     body('response').isIn(['confirm', 'cancel', 'reschedule']).withMessage('Respuesta inválida'),
     body('patientMessage').isLength({ min: 1 }).withMessage('Mensaje del paciente requerido'),
@@ -145,7 +145,7 @@ router.post('/confirmation/process', AuthMiddleware.authenticate, [
  * @desc    Obtener estadísticas de WhatsApp
  * @access  Private
  */
-router.get('/statistics', AuthMiddleware.authenticate, [
+router.get('/statistics', AuthMiddleware.authenticateToken, [
     query('startDate').optional().isISO8601(),
     query('endDate').optional().isISO8601(),
     query('metric').optional().isIn(['conversations', 'messages', 'confirmations', 'responses'])
@@ -156,7 +156,7 @@ router.get('/statistics', AuthMiddleware.authenticate, [
  * @desc    Obtener actividad reciente de WhatsApp
  * @access  Private
  */
-router.get('/activity', AuthMiddleware.authenticate, [
+router.get('/activity', AuthMiddleware.authenticateToken, [
     query('limit').optional().isInt({ min: 1, max: 100 }),
     query('type').optional().isIn(['message', 'confirmation', 'template', 'error'])
 ], whatsappController.getActivity);
@@ -168,7 +168,7 @@ router.get('/activity', AuthMiddleware.authenticate, [
  * @desc    Subir archivo multimedia
  * @access  Private
  */
-router.post('/media', AuthMiddleware.authenticate, [
+router.post('/media', AuthMiddleware.authenticateToken, [
     body('conversationId').isInt({ min: 1 }).withMessage('ID de conversación requerido'),
     body('fileType').isIn(['image', 'document', 'audio', 'video']).withMessage('Tipo de archivo inválido'),
     body('fileName').isLength({ min: 1, max: 255 }).withMessage('Nombre de archivo requerido')
@@ -179,7 +179,7 @@ router.post('/media', AuthMiddleware.authenticate, [
  * @desc    Descargar archivo multimedia
  * @access  Private
  */
-router.get('/media/:id/download', AuthMiddleware.authenticate, [
+router.get('/media/:id/download', AuthMiddleware.authenticateToken, [
     param('id').isInt({ min: 1 }).withMessage('ID de media inválido')
 ], whatsappController.downloadMedia);
 
@@ -199,14 +199,14 @@ router.post('/webhook', whatsappController.webhook);
  * @desc    Obtener configuración de WhatsApp
  * @access  Private
  */
-router.get('/config', AuthMiddleware.authenticate, whatsappController.getConfig);
+router.get('/config', AuthMiddleware.authenticateToken, whatsappController.getConfig);
 
 /**
  * @route   PUT /api/whatsapp/config
  * @desc    Actualizar configuración de WhatsApp
  * @access  Private
  */
-router.put('/config', AuthMiddleware.authenticate, [
+router.put('/config', AuthMiddleware.authenticateToken, [
     body('enabled').optional().isBoolean(),
     body('phoneNumberId').optional().isString(),
     body('accessToken').optional().isString(),
