@@ -895,3 +895,14 @@
 # uploads/
 # downloads/
 
+
+# Ignore development files
+dentalcare-pro/
+user_input_files/
+*.png
+*.jpg
+*.jpeg
+*.xlsx
+*.tar.gz
+deploy_output.log
+script_output.log
